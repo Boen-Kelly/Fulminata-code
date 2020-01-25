@@ -36,6 +36,7 @@ public class station_test extends LinearOpMode {
     int prevMockGoalLiftHeight;
     boolean goingUp = false;
     boolean goingDown = false;
+    GamepadEx driverGamepad;
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -44,6 +45,7 @@ public class station_test extends LinearOpMode {
         parameters.angleUnit = BNO055IMU.AngleUnit.DEGREES;
         parameters.calibrationDataFile = "BNO055IMUCalibration.json";
 
+        driverGamepad = new GamepadEx(gamepad1);
         imu = hardwareMap.get(BNO055IMU.class, "imu");
         backLeftWheel = hardwareMap.get(DcMotor.class, "Back_left_wheel");
         backRightWheel = hardwareMap.get(DcMotor.class, "Back_right_wheel");

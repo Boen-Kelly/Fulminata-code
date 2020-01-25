@@ -41,6 +41,9 @@ android {
         minSdkVersion 19
         targetSdkVersion 26
 
+
+        multiDexEnabled true
+
         /**
          * We keep the versionCode and versionName of robot controller applications in sync with
          * the master information published in the AndroidManifest.xml file of the FtcRobotController
@@ -104,6 +107,9 @@ android {
 repositories {
     flatDir {
         dirs rootProject.file('libs')
+    }
+    maven{
+        url "https://ftclib.bintray.com.FTCLib"
     }
 }
 apply from: 'build.release.gradle'

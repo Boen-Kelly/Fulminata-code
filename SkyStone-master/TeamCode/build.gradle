@@ -111,4 +111,5 @@ repositories {
 apply from: 'build.release.gradle'
 
 dependencies {
+    implementation 'com.arcrobotics:ftclib:1.0.2'
 }

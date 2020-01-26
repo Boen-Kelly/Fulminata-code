@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode;
 
+import com.arcrobotics.ftclib.gamepad.ButtonReader;
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -17,6 +18,9 @@ import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 
+import com.arcrobotics.ftclib.gamepad.GamepadEx;
+import com.arcrobotics.ftclib.gamepad.GamepadKeys;
+
 @TeleOp
 public class station_test extends LinearOpMode {
 
@@ -33,10 +37,11 @@ public class station_test extends LinearOpMode {
     boolean downButton;
     double liftMultiplier = 1;
     int goalLiftHeight = 0;
-    int prevMockGoalLiftHeight;
+    int prevGoalLiftHeight;
     boolean goingUp = false;
     boolean goingDown = false;
     GamepadEx driverGamepad;
+    ButtonReader gamepadupButton,gamepadDownButton;
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -46,6 +51,8 @@ public class station_test extends LinearOpMode {
         parameters.calibrationDataFile = "BNO055IMUCalibration.json";
 
         driverGamepad = new GamepadEx(gamepad1);
+        gamepadupButton = new ButtonReader(driverGamepad, GamepadKeys.Button.DPAD_UP);
+        gamepadDownButton = new ButtonReader(driverGamepad, GamepadKeys.Button.DPAD_DOWN);
         imu = hardwareMap.get(BNO055IMU.class, "imu");
         backLeftWheel = hardwareMap.get(DcMotor.class, "Back_left_wheel");
         backRightWheel = hardwareMap.get(DcMotor.class, "Back_right_wheel");
@@ -98,7 +105,13 @@ public class station_test extends LinearOpMode {
         waitForStart();
 
         while (opModeIsActive()) {
-            if (gamepad2.dpad_up) {
+
+            if (gamepadupButton.wasJustPressed()){
+                goalLiftHeight += 560;
+            } else if (gamepadDownButton.wasJustPressed()){
+                goalLiftHeight -= 560;
+            }
+            /**if (gamepad2.dpad_up) {
                 if (!upButton) {
                     //startPosition = linearLift.getCurrentPosition();
                     mockGoalLiftheight++;
@@ -123,16 +136,14 @@ public class station_test extends LinearOpMode {
             } else {
                 downButton = false;
             }
-
-            if (mockGoalLiftheight > 4) {
-                mockGoalLiftheight = 4;
-            } else if (mockGoalLiftheight < 0) {
-                mockGoalLiftheight = 0;
-            } else{
-                mockGoalLiftheight = mockGoalLiftheight;
+*/
+            if (goalLiftHeight > 1600) {
+             goalLiftHeight = 1600;
+            } else if (goalLiftHeight < 0) {
+                goalLiftHeight = 0;
             }
 
-            if (mockGoalLiftheight == 0) {
+/**            if (mockGoalLiftheight == 0) {
                 goalLiftHeight = 0;
 
             } else if (mockGoalLiftheight == 1) {
@@ -148,11 +159,11 @@ public class station_test extends LinearOpMode {
                 goalLiftHeight = -2240;
 
             }
-
-            if (prevMockGoalLiftHeight > mockGoalLiftheight){
+*/
+            if (prevGoalLiftHeight > goalLiftHeight){
                 goingUp = true;
                 goingDown = false;
-            } else if (prevMockGoalLiftHeight < mockGoalLiftheight){
+            } else if (prevGoalLiftHeight < goalLiftHeight){
                 goingDown = true;
                 goingUp = false;
             }
@@ -218,7 +229,7 @@ public class station_test extends LinearOpMode {
                 telemetry.addData("mockGoalLiftHeight:", mockGoalLiftheight);
                 telemetry.update();
 
-                prevMockGoalLiftHeight = mockGoalLiftheight;
+                prevGoalLiftHeight = goalLiftHeight;
         }
     }
 

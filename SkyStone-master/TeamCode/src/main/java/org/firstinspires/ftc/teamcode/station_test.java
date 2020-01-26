@@ -104,12 +104,15 @@ public class station_test extends LinearOpMode {
 
         waitForStart();
 
-        while (opModeIsActive()) {
+        while (opModeIsActive()){
+
+            gamepadupButton.readValue();
+            gamepadDownButton.readValue();
 
             if (gamepadupButton.wasJustPressed()){
-                goalLiftHeight += 560;
+                mockGoalLiftheight ++;
             } else if (gamepadDownButton.wasJustPressed()){
-                goalLiftHeight -= 560;
+                mockGoalLiftheight -= 1;
             }
             /**if (gamepad2.dpad_up) {
                 if (!upButton) {
@@ -143,6 +146,36 @@ public class station_test extends LinearOpMode {
                 goalLiftHeight = 0;
             }
 
+            switch (mockGoalLiftheight) {
+                case 0:
+                    goalLiftHeight = 0;
+                    break;
+                case 1:
+                    goalLiftHeight = -560;
+                    break;
+                case 2:
+                    goalLiftHeight = -1120;
+                    break;
+                case 3:
+                    goalLiftHeight = -1680;
+                    break;
+                case 4:
+                    goalLiftHeight = -2240;
+                    break;
+
+                default:
+                    goalLiftHeight = 0;
+                    break;
+            }
+
+            linearLift.setTargetPosition(goalLiftHeight);
+            linearLift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            linearLift2.setTargetPosition(goalLiftHeight);
+            linearLift2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+            linearLift.setPower(0.5);
+            linearLift2.setPower(0.5);
+
 /**            if (mockGoalLiftheight == 0) {
                 goalLiftHeight = 0;
 
@@ -159,7 +192,7 @@ public class station_test extends LinearOpMode {
                 goalLiftHeight = -2240;
 
             }
-*/
+
             if (prevGoalLiftHeight > goalLiftHeight){
                 goingUp = true;
                 goingDown = false;

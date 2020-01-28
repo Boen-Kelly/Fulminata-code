@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.Red_Autonomous;
 
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
@@ -17,6 +18,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 
 @Autonomous (name = "Red side tray and block back", group = "Red")
+@Disabled
 public class Red_side_tray_block_back extends LinearOpMode {
 
     private DcMotor backLeftWheel,backRightWheel,frontLeftWheel,frontRightWheel,linearLift,linearLift2;

@@ -23,6 +23,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 
 @Autonomous(name = "Blue side tray park front side", group = "Blue")
+@Disabled
 public class Blue_side_tray_front extends LinearOpMode {
     private  ElapsedTime runtime = new ElapsedTime();
     private DcMotor backLeftWheel,backRightWheel,frontLeftWheel,frontRightWheel,linearLift,linearLift2;

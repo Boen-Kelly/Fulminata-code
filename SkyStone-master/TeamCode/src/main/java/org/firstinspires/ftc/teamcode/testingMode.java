@@ -13,7 +13,7 @@ import com.qualcomm.hardware.bosch.BNO055IMU;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 //@Disabled
 @TeleOp (name = "Testing mode")
-//@Disabled
+@Disabled
 public class testingMode extends LinearOpMode{
     private ElapsedTime runtime = new ElapsedTime();
     private DcMotor backLeftWheel,backRightWheel,frontLeftWheel,frontRightWheel,linearLift,linearLift2;

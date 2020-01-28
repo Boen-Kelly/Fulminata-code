@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -18,6 +19,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 
 @TeleOp
+@Disabled
 public class Gyro_drive_test extends LinearOpMode {
 
     private DcMotor backLeftWheel, backRightWheel, frontLeftWheel, frontRightWheel, linearLift, linearLift2;
@@ -27,6 +29,7 @@ public class Gyro_drive_test extends LinearOpMode {
     DistanceSensor Distance;
     DigitalChannel Touch;
     private ElapsedTime runtime = new ElapsedTime();
+    double straight,strafe,rotation;
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -84,10 +87,20 @@ public class Gyro_drive_test extends LinearOpMode {
 
         while (opModeIsActive()){
 
+            straight = gamepad1.left_stick_y;
+            strafe = gamepad1.left_stick_x;
+            rotation = gamepad1.right_stick_x;
+
             if (gamepad1.right_trigger > .5) {
                 if (((gamepad1.left_stick_y != 0) || (gamepad1.left_stick_x != 0)) || (gamepad1.right_stick_x != 0)) {
                     Drive(gamepad1.left_stick_y, gamepad1.left_stick_x, gamepad1.right_stick_x);
                 }
+            } else {
+                frontRightWheel.setPower(straight - strafe - rotation);
+                frontLeftWheel.setPower(straight + strafe + rotation);
+                backRightWheel.setPower(straight + strafe - rotation);
+                backLeftWheel.setPower(straight - strafe + rotation);
+
             }
         }
 
@@ -97,30 +110,23 @@ public class Gyro_drive_test extends LinearOpMode {
 
         double backleftSpeed,backrightSpeed,frontleftSpeed,frontrightSpeed;
 
-        backLeftWheel.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        backRightWheel.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        backLeftWheel.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        backRightWheel.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
-
-        double startPosition = backLeftWheel.getCurrentPosition();
         double frontRPower = straight - strafe - rotation;
         double frontLPower = straight + strafe + rotation;
         double backRPower = straight + strafe - rotation;
         double backLPower  = straight - strafe + rotation;
-        angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
-        double target = angles.firstAngle;
+        //angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+        //double target = angles.firstAngle;
 
-        while ((((gamepad1.left_stick_y != 0) || (gamepad1.left_stick_x != 0)) || (gamepad1.right_stick_x != 0)) && opModeIsActive()){
+    //    while ((((gamepad1.left_stick_y != 0) || (gamepad1.left_stick_x != 0)) || (gamepad1.right_stick_x != 0)) && opModeIsActive()){
             angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
             double currentHeading = angles.firstAngle;
 
-            double correction = (target - currentHeading)/100;
+          //  double correction = (target - currentHeading)/100;
 
-            backleftSpeed = backLPower - (correction * 2);
-            backrightSpeed = backRPower + (correction * 2);
-            frontleftSpeed = frontLPower - (correction * 2);
-            frontrightSpeed = frontRPower + (correction * 2);
+            backleftSpeed = backLPower;
+            backrightSpeed = backRPower;
+            frontleftSpeed = frontLPower;
+            frontrightSpeed = frontRPower;
 
             backrightSpeed = Range.clip (backrightSpeed,-1,1);
             backleftSpeed = Range.clip (backleftSpeed,-1,1);
@@ -136,8 +142,7 @@ public class Gyro_drive_test extends LinearOpMode {
 
             angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
             telemetry.addData("current heading:", angles.firstAngle);
-            telemetry.addData("desired heading:", startPosition);
-        }
+        //}
 
         backLeftWheel.setPower(0);
         frontLeftWheel.setPower(0);

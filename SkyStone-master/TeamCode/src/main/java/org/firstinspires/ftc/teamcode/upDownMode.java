@@ -163,7 +163,7 @@ public class upDownMode extends LinearOpMode {
             double stickHeight = this.gamepad2.left_stick_y;
 
 
-            if (currentPosition <= -1675) {
+            if (currentPosition <= -5100) {
                 if (stickHeight > .25) {
                     linearLift.setPower(stickHeight * liftMultiplier);
                     linearLift2.setPower(stickHeight * liftMultiplier);
@@ -183,7 +183,7 @@ public class upDownMode extends LinearOpMode {
                 if ((stickHeight > .25) && !(currentPosition >= 0)) {
                     linearLift.setPower(stickHeight * liftMultiplier);
                     linearLift2.setPower(stickHeight * liftMultiplier);
-                } else if ((stickHeight < -0.25) && !(currentPosition <= -1675)) {
+                } else if ((stickHeight < -0.25) && !(currentPosition <= -5100)) {
                     linearLift.setPower(stickHeight * liftMultiplier);
                     linearLift2.setPower(stickHeight * liftMultiplier);
                 } else {

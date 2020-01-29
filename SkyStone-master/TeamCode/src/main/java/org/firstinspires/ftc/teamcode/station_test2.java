@@ -25,7 +25,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 
 @TeleOp
-@Disabled
+//@Disabled
 public class station_test2 extends LinearOpMode {
 
     private DcMotor backLeftWheel, backRightWheel, frontLeftWheel, frontRightWheel;
@@ -161,20 +161,42 @@ public class station_test2 extends LinearOpMode {
             }*/
 
             if (mockGoalLiftHeight == 0) {
-                goalLiftHeight = 0;
+
+                linearLift.setTargetPosition(0);
+                linearLift2.setTargetPosition(0);
+                linearLift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                linearLift2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                linearLift.setPower(1);
+                linearLift2.setPower(1);
 
             } else if (mockGoalLiftHeight == 1) {
-                goalLiftHeight = -5600;
-
+                linearLift.setTargetPosition(-560);
+                linearLift2.setTargetPosition(-560);
+                linearLift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                linearLift2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                linearLift.setPower(1);
+                linearLift2.setPower(1);
             } else if (mockGoalLiftHeight == 2) {
-                goalLiftHeight = -11200;
-
+                linearLift.setTargetPosition(-1120);
+                linearLift2.setTargetPosition(-1120);
+                linearLift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                linearLift2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                linearLift.setPower(1);
+                linearLift2.setPower(1);
             } else if (mockGoalLiftHeight == 3) {
-                goalLiftHeight = -16800;
-
+                linearLift.setTargetPosition(-1680);
+                linearLift2.setTargetPosition(-1680);
+                linearLift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                linearLift2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                linearLift.setPower(1);
+                linearLift2.setPower(1);
             } else if (mockGoalLiftHeight == 4) {
-                goalLiftHeight = -22400;
-
+                linearLift.setTargetPosition(-2240);
+                linearLift2.setTargetPosition(-2240);
+                linearLift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                linearLift2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                linearLift.setPower(1);
+                linearLift2.setPower(1);
             }
 
             /**if (goingUp && (linearLift.getCurrentPosition() <= goalLiftHeight)){
@@ -182,12 +204,7 @@ public class station_test2 extends LinearOpMode {
                 //linearLift2.setPower(0);
                 loopIdentifier = "Stopped at up";
             } else {*/
-                linearLift.setTargetPosition(goalLiftHeight);
-                linearLift2.setTargetPosition(goalLiftHeight);
-                linearLift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                linearLift2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                linearLift.setPower(1);
-                linearLift2.setPower(1);
+
                 loopIdentifier = "Moving";
             //}
 

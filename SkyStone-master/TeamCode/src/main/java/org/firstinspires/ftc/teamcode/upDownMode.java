@@ -1,6 +1,10 @@
 package org.firstinspires.ftc.teamcode;
 
 
+import com.arcrobotics.ftclib.gamepad.ButtonReader;
+import com.arcrobotics.ftclib.gamepad.GamepadEx;
+import com.arcrobotics.ftclib.gamepad.GamepadKeys;
+import com.arcrobotics.ftclib.gamepad.TriggerReader;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -38,12 +42,17 @@ public class upDownMode extends LinearOpMode {
     private Servo CLAW, trayServoL, trayServoR,Capstone;
     double startPosition;
     int goalLiftHeight = 0;
-    boolean upButton;
-    boolean downButton;
     double liftMultiplier = 1;
     boolean open;
     double totalTicks;
-
+    private GamepadEx driverGamepad, operatorGamepad;
+    private ButtonReader upButton, downButton;
+    int mockGoalLiftHeight;
+    double speed;
+    double rotation;
+    double strafe;
+    double multiplier = 0;
+    boolean buttonPressed = false;
 
     @Override
 
@@ -61,7 +70,14 @@ public class upDownMode extends LinearOpMode {
         trayServoL = hardwareMap.servo.get("trayServoL");
         trayServoR = hardwareMap.servo.get("trayServoR");
         Capstone = hardwareMap.get(Servo.class, "Capstone");
+        //xbutton = new ButtonReader(operatorGamepad, GamepadKeys.Button.X);
+        operatorGamepad = new GamepadEx(gamepad2);
+        upButton = new ButtonReader(operatorGamepad, GamepadKeys.Button.DPAD_UP);
+        downButton = new ButtonReader(operatorGamepad, GamepadKeys.Button.DPAD_DOWN);
 
+
+        linearLift.setTargetPositionTolerance(30);
+        linearLift2.setTargetPositionTolerance(30);
 
         backLeftWheel.setDirection(DcMotor.Direction.REVERSE);
 
@@ -97,12 +113,11 @@ public class upDownMode extends LinearOpMode {
         //run until the end of the match (driver presses STOP)
 
 
-        double speed;
-        double rotation;
-        double strafe;
-        double multiplier = 0;
+
 
         while (opModeIsActive()) {
+            upButton.readValue();
+            downButton.readValue();
 
             // Drive code
 
@@ -163,47 +178,39 @@ public class upDownMode extends LinearOpMode {
             double stickHeight = this.gamepad2.left_stick_y;
 
 
-            if (currentPosition <= -5100) {
+            if (currentPosition <= -22400) {
                 if (stickHeight > .25) {
                     linearLift.setPower(stickHeight * liftMultiplier);
                     linearLift2.setPower(stickHeight * liftMultiplier);
-                } else {
-                    linearLift.setPower(0);
-                    linearLift2.setPower(0);
-                }
-            } else if (currentPosition >= -100) {
+                }// else {
+                   // linearLift.setPower(0);
+                    //linearLift2.setPower(0);
+                //}
+            } else if (currentPosition >= 0) {
                 if (stickHeight < -.25) {
                     linearLift.setPower(stickHeight * liftMultiplier);
                     linearLift2.setPower(stickHeight * liftMultiplier);
-                } else {
-                    linearLift.setPower(0);
-                    linearLift2.setPower(0);
-                }
+                }// else {
+                    //linearLift.setPower(0);
+                    //linearLift2.setPower(0);
+                //}
             } else {
                 if ((stickHeight > .25) && !(currentPosition >= 0)) {
                     linearLift.setPower(stickHeight * liftMultiplier);
                     linearLift2.setPower(stickHeight * liftMultiplier);
-                } else if ((stickHeight < -0.25) && !(currentPosition <= -5100)) {
+                } else if ((stickHeight < -0.25) && !(currentPosition <= -22400)) {
                     linearLift.setPower(stickHeight * liftMultiplier);
                     linearLift2.setPower(stickHeight * liftMultiplier);
-                } else {
-                    linearLift.setPower(0);
-                    linearLift2.setPower(0);
-                }
+                }// else {
+                    //linearLift.setPower(0);
+                    //linearLift2.setPower(0);
+                //}
             }
 
-            if ((this.gamepad2.left_trigger > .5) && (gamepad2.x)) {
-                if (!upButton) {
+            //if (xbutton.wasJustPressed() && (gamepad2.left_trigger > .5)){
+              //  open = !open;
+            //}
 
-                    open = !open;
-                    upButton = true;
-
-                } else {
-                }
-
-            } else {
-                upButton = false;
-            }
 
             if (((gamepad2.left_trigger > .5) && gamepad2.x)){
                 if (open){
@@ -212,162 +219,89 @@ public class upDownMode extends LinearOpMode {
                     Capstone.setPosition(0);
                 }
 
-            }else {
-                Capstone.setPosition(0);
             }
 
-            if (goalLiftHeight > 4) {
-                goalLiftHeight = 3;
+
+
+            if (upButton.wasJustPressed()) {
+                mockGoalLiftHeight++;
+            } else if (downButton.wasJustPressed()) {
+                mockGoalLiftHeight -= 1;
             }
-            if (goalLiftHeight < 0) {
+
+            if (mockGoalLiftHeight > 7) {
+                mockGoalLiftHeight = 7;
+            } else if (mockGoalLiftHeight < 0) {
+                mockGoalLiftHeight = 0;
+            }
+
+            // Alternative to below if statements
+
+            /*switch (mockGoalLiftHeight) {
+                case 0:
+                    goalLiftHeight = 0;
+                    break;
+                case 1:
+                    goalLiftHeight = -560;
+                    break;
+                case 2:
+                    goalLiftHeight = -1120;
+                    break;
+                case 3:
+                    goalLiftHeight = -1680;
+                    break;
+                case 4:
+                    goalLiftHeight = -2240;
+                    break;
+
+                default:
+                    goalLiftHeight = 0;
+                    break;
+            }*/
+
+            if (upButton.wasJustPressed() || downButton.wasJustPressed()){
+                buttonPressed = true;
+            }
+
+            if ((mockGoalLiftHeight == 0) && buttonPressed) {
                 goalLiftHeight = 0;
-            }
-
-            if (gamepad2.dpad_up) {
-                if (!upButton) {
-                    startPosition = linearLift.getCurrentPosition();
-                    goalLiftHeight =+ 240;
-                    upButton = true;
-
-                } else {
-                }
-
+            } else if ((mockGoalLiftHeight == 1) && buttonPressed) {
+                goalLiftHeight = -5600;
+            } else if ((mockGoalLiftHeight == 2) && buttonPressed) {
+                goalLiftHeight = -11200;
+            } else if ((mockGoalLiftHeight == 3) && buttonPressed) {
+                goalLiftHeight = -16800;
+            } else if ((mockGoalLiftHeight == 4) && buttonPressed) {
+                goalLiftHeight = -22400;
+            }else if ((mockGoalLiftHeight == 5) && buttonPressed) {
+                goalLiftHeight = -22400;
+            }else if ((mockGoalLiftHeight == 6) && buttonPressed) {
+                goalLiftHeight = -22400;
+            }else if ((mockGoalLiftHeight == 7) && buttonPressed) {
+                goalLiftHeight = -22400;
             } else {
-                upButton = false;
+                goalLiftHeight = linearLift.getCurrentPosition();
             }
 
-            if (gamepad2.dpad_down) {
-                if (!downButton) {
-                    startPosition = linearLift.getCurrentPosition();
-                    goalLiftHeight =- 240;
-                    downButton = true;
 
-                } else {
-                }
 
-            } else {
-                downButton = false;
-            }
-
-            /**if (this.gamepad2.dpad_up) {
-                if (goalLiftHeight == 1) {
-                    linearLift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                    linearLift2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                    linearLift.setTargetPosition(1120);
-                    linearLift2.setTargetPosition(1120);
-                    linearLift.setPower(.5);
-                    linearLift2.setPower(.5);
-
-                    while (linearLift.isBusy() && linearLift2.isBusy()){
-
-                    }
-
-                } else if (goalLiftHeight == 2) {
-                    linearLift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                    linearLift2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                    linearLift.setTargetPosition(1120);
-                    linearLift2.setTargetPosition(1120);
-                    linearLift.setPower(.5);
-                    linearLift2.setPower(.5);
-
-                    while (linearLift.isBusy() && linearLift2.isBusy()){
-
-                    }
-                } else if (goalLiftHeight == 3) {
-                    linearLift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                    linearLift2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                    linearLift.setTargetPosition(1120);
-                    linearLift2.setTargetPosition(1120);
-                    linearLift.setPower(.5);
-                    linearLift2.setPower(.5);
-                    while (linearLift.isBusy() && linearLift2.isBusy()){
-
-                    }
-                } else if (goalLiftHeight == 4) {
-                    linearLift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                    linearLift2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                    linearLift.setTargetPosition(1120);
-                    linearLift2.setTargetPosition(1120);
-                    linearLift.setPower(.5);
-                    linearLift2.setPower(.5);
-                    while (linearLift.isBusy() && linearLift2.isBusy()){
-
-                    }
-                }
-            } else if (this.gamepad2.dpad_down) {
-                if (goalLiftHeight == 0) {
-                    linearLift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                    linearLift2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                    linearLift.setTargetPosition(1120);
-                    linearLift2.setTargetPosition(1120);
-                    linearLift.setPower(.5);
-                    linearLift2.setPower(.5);
-                    while (linearLift.isBusy() && linearLift2.isBusy()){
-
-                    }
-                } else if (goalLiftHeight == 1) {
-                    linearLift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                    linearLift2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                    linearLift.setTargetPosition(1120);
-                    linearLift2.setTargetPosition(1120);
-                    linearLift.setPower(.5);
-                    linearLift2.setPower(.5);
-                    while (linearLift.isBusy() && linearLift2.isBusy()){
-
-                    }
-                } else if (goalLiftHeight == 2) {
-                    linearLift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                    linearLift2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                    linearLift.setTargetPosition(1120);
-                    linearLift2.setTargetPosition(1120);
-                    linearLift.setPower(.5);
-                    linearLift2.setPower(.5);
-                    while (linearLift.isBusy() && linearLift2.isBusy()){
-
-                    }
-                } else if (goalLiftHeight == 3) {
-                    linearLift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                    linearLift2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                    linearLift.setTargetPosition(1120);
-                    linearLift2.setTargetPosition(1120);
-                    linearLift.setPower(.5);
-                    linearLift2.setPower(.5);
-                    while (linearLift.isBusy() && linearLift2.isBusy()){
-
-                    }
-                }
-            } else {
-                linearLift.setPower(0);
-                linearLift2.setPower(0);
-            }
-            double ticksLeft = goalLiftHeight - linearLift.getCurrentPosition();
-            totalTicks = goalLiftHeight - startPosition;
-            double approachSpeed = ticksLeft / totalTicks;
-
-          if (linearLift.getCurrentPosition() <= goalLiftHeight){
-              linearLift.setTargetPosition(goalLiftHeight);
-              linearLift2.setTargetPosition(goalLiftHeight);
-              linearLift.setPower(approachSpeed);
-              linearLift2.setPower(approachSpeed);
-              linearLift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-              linearLift2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-          }else if (linearLift.getCurrentPosition() >= goalLiftHeight){
-              linearLift.setTargetPosition(goalLiftHeight);
-              linearLift2.setTargetPosition(goalLiftHeight);
-              linearLift.setPower(approachSpeed);
-              linearLift2.setPower(approachSpeed);
-              linearLift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-              linearLift2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-          }*/
 
 
             if (gamepad2.left_stick_button) {
                 linearLift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
                 linearLift2.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-            } else {
+            } else if ((gamepad2.left_stick_y > .1) || (gamepad2.left_stick_y < -.1)){
                 linearLift.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
                 linearLift2.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+                buttonPressed = false;
 
+            } else {
+                linearLift.setTargetPosition(goalLiftHeight);
+                linearLift2.setTargetPosition(goalLiftHeight);
+                linearLift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                linearLift2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                linearLift.setPower(1);
+                linearLift2.setPower(1);
             }
 
             telemetry.addData("CLAAAAAW position", CLAW.getPosition());
@@ -375,6 +309,12 @@ public class upDownMode extends LinearOpMode {
             telemetry.addData("Motor Power", backLeftWheel.getPower());
             telemetry.addData("Status", "Running");
             telemetry.addData("Linear lift height", linearLift.getCurrentPosition());
+            telemetry.addData("linear lift 2 height:", linearLift2.getCurrentPosition());
+            telemetry.addData("linear lift 2 target height:", linearLift2.getTargetPosition());
+            telemetry.addData("target height:", goalLiftHeight);
+            telemetry.addData("mockGoalLiftHeight:", mockGoalLiftHeight);
+            telemetry.addData("linear lift mode:",linearLift.getMode());
+            telemetry.addData("stick height:",gamepad2.left_stick_y);
 
             telemetry.update();
 

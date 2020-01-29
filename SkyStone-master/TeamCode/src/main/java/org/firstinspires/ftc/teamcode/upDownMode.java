@@ -53,6 +53,8 @@ public class upDownMode extends LinearOpMode {
     double strafe;
     double multiplier = 0;
     boolean buttonPressed = false;
+    boolean regMode;
+    int goalLiftHeight2;
 
     @Override
 
@@ -76,8 +78,8 @@ public class upDownMode extends LinearOpMode {
         downButton = new ButtonReader(operatorGamepad, GamepadKeys.Button.DPAD_DOWN);
 
 
-        linearLift.setTargetPositionTolerance(30);
-        linearLift2.setTargetPositionTolerance(30);
+        linearLift.setTargetPositionTolerance(40);
+        linearLift2.setTargetPositionTolerance(40);
 
         backLeftWheel.setDirection(DcMotor.Direction.REVERSE);
 
@@ -177,23 +179,22 @@ public class upDownMode extends LinearOpMode {
             int currentPosition = linearLift.getCurrentPosition();
             double stickHeight = this.gamepad2.left_stick_y;
 
-
             if (currentPosition <= -22400) {
                 if (stickHeight > .25) {
                     linearLift.setPower(stickHeight * liftMultiplier);
                     linearLift2.setPower(stickHeight * liftMultiplier);
-                }// else {
-                   // linearLift.setPower(0);
-                    //linearLift2.setPower(0);
-                //}
+                } else {
+                    linearLift.setPower(0);
+                    linearLift2.setPower(0);
+                }
             } else if (currentPosition >= 0) {
                 if (stickHeight < -.25) {
                     linearLift.setPower(stickHeight * liftMultiplier);
                     linearLift2.setPower(stickHeight * liftMultiplier);
-                }// else {
-                    //linearLift.setPower(0);
-                    //linearLift2.setPower(0);
-                //}
+                } else {
+                    linearLift.setPower(0);
+                    linearLift2.setPower(0);
+                }
             } else {
                 if ((stickHeight > .25) && !(currentPosition >= 0)) {
                     linearLift.setPower(stickHeight * liftMultiplier);
@@ -201,15 +202,8 @@ public class upDownMode extends LinearOpMode {
                 } else if ((stickHeight < -0.25) && !(currentPosition <= -22400)) {
                     linearLift.setPower(stickHeight * liftMultiplier);
                     linearLift2.setPower(stickHeight * liftMultiplier);
-                }// else {
-                    //linearLift.setPower(0);
-                    //linearLift2.setPower(0);
-                //}
+                }
             }
-
-            //if (xbutton.wasJustPressed() && (gamepad2.left_trigger > .5)){
-              //  open = !open;
-            //}
 
 
             if (((gamepad2.left_trigger > .5) && gamepad2.x)){
@@ -264,23 +258,32 @@ public class upDownMode extends LinearOpMode {
             }
 
             if ((mockGoalLiftHeight == 0) && buttonPressed) {
+                goalLiftHeight2 = 0;
                 goalLiftHeight = 0;
             } else if ((mockGoalLiftHeight == 1) && buttonPressed) {
+                goalLiftHeight2 = -5600;
                 goalLiftHeight = -5600;
             } else if ((mockGoalLiftHeight == 2) && buttonPressed) {
+                goalLiftHeight2 = -11200;
                 goalLiftHeight = -11200;
             } else if ((mockGoalLiftHeight == 3) && buttonPressed) {
+                goalLiftHeight2 = -16800;
                 goalLiftHeight = -16800;
             } else if ((mockGoalLiftHeight == 4) && buttonPressed) {
+                goalLiftHeight2 = -22400;
                 goalLiftHeight = -22400;
             }else if ((mockGoalLiftHeight == 5) && buttonPressed) {
+                goalLiftHeight2 = -22400;
                 goalLiftHeight = -22400;
             }else if ((mockGoalLiftHeight == 6) && buttonPressed) {
                 goalLiftHeight = -22400;
+                goalLiftHeight2 = -22400;
             }else if ((mockGoalLiftHeight == 7) && buttonPressed) {
                 goalLiftHeight = -22400;
+                goalLiftHeight2 = -22400;
             } else {
                 goalLiftHeight = linearLift.getCurrentPosition();
+                goalLiftHeight2 = linearLift2.getCurrentPosition();
             }
 
 
@@ -290,14 +293,14 @@ public class upDownMode extends LinearOpMode {
             if (gamepad2.left_stick_button) {
                 linearLift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
                 linearLift2.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-            } else if ((gamepad2.left_stick_y > .1) || (gamepad2.left_stick_y < -.1)){
+            } else if ((gamepad2.left_stick_y > .25) || (gamepad2.left_stick_y < -.25)){
                 linearLift.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
                 linearLift2.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
                 buttonPressed = false;
 
             } else {
                 linearLift.setTargetPosition(goalLiftHeight);
-                linearLift2.setTargetPosition(goalLiftHeight);
+                linearLift2.setTargetPosition(goalLiftHeight2);
                 linearLift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 linearLift2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 linearLift.setPower(1);

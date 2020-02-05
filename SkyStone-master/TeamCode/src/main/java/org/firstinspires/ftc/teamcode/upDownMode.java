@@ -46,16 +46,16 @@ public class upDownMode extends LinearOpMode {
     boolean open;
     double totalTicks;
     private GamepadEx driverGamepad, operatorGamepad;
-    private ButtonReader upButton, downButton;
-    int mockGoalLiftHeight;
+    private ButtonReader upButton, downButton,leftBumper,rightBumper;
+    int mockGoalLiftHeight = 0;
     double speed;
     double rotation;
     double strafe;
     double multiplier = 0;
     boolean buttonPressed = false;
-    boolean regMode;
-    int goalLiftHeight2;
-
+    double correctionMultiplier;
+    private TriggerReader leftTrigger,rightTrigger;
+    boolean openButton = false;
     @Override
 
 
@@ -76,10 +76,14 @@ public class upDownMode extends LinearOpMode {
         operatorGamepad = new GamepadEx(gamepad2);
         upButton = new ButtonReader(operatorGamepad, GamepadKeys.Button.DPAD_UP);
         downButton = new ButtonReader(operatorGamepad, GamepadKeys.Button.DPAD_DOWN);
+        leftTrigger = new TriggerReader(operatorGamepad, GamepadKeys.Trigger.LEFT_TRIGGER);
+        rightTrigger = new TriggerReader(operatorGamepad, GamepadKeys.Trigger.RIGHT_TRIGGER);
+        rightBumper = new ButtonReader(operatorGamepad, GamepadKeys.Button.RIGHT_BUMPER);
+        leftBumper = new ButtonReader(operatorGamepad, GamepadKeys.Button.LEFT_BUMPER);
 
 
-        linearLift.setTargetPositionTolerance(40);
-        linearLift2.setTargetPositionTolerance(40);
+        linearLift.setTargetPositionTolerance(60);
+        linearLift2.setTargetPositionTolerance(60);
 
         backLeftWheel.setDirection(DcMotor.Direction.REVERSE);
 
@@ -100,6 +104,7 @@ public class upDownMode extends LinearOpMode {
         CLAW.setPosition(0);
         trayServoL.setPosition(0);
         trayServoR.setPosition(1);
+        Capstone.setPosition(0);
 
         telemetry.addData("Status", "Initialized");
 
@@ -120,6 +125,10 @@ public class upDownMode extends LinearOpMode {
         while (opModeIsActive()) {
             upButton.readValue();
             downButton.readValue();
+            leftTrigger.readValue();
+            rightTrigger.readValue();
+            rightBumper.readValue();
+            leftBumper.readValue();
 
             // Drive code
 
@@ -167,7 +176,7 @@ public class upDownMode extends LinearOpMode {
             //**
             //This code is for slowing down the lift, if we don't use it, then just un-comment out this code ^^ above
 
-            if (gamepad2.right_trigger > .25) {
+            if (rightBumper.isDown()) {
                 liftMultiplier = .5;
             } else {
                 liftMultiplier = 1;
@@ -175,38 +184,113 @@ public class upDownMode extends LinearOpMode {
             //*/
 
 
+            int lin2Height = linearLift2.getCurrentPosition();
+            int lin1Height = linearLift.getCurrentPosition();
 
-            int currentPosition = linearLift.getCurrentPosition();
+            if (lin2Height == 0) {
+                lin2Height = 1;
+            }
+
+            if (lin1Height == 0){
+                lin1Height = 1;
+            }
+
+            double errorRate = Math.abs(lin1Height/lin2Height);
+
             double stickHeight = this.gamepad2.left_stick_y;
 
-            if (currentPosition <= -22400) {
+            if ((lin1Height <= goalLiftHeight) && (lin2Height <= goalLiftHeight)) {
                 if (stickHeight > .25) {
-                    linearLift.setPower(stickHeight * liftMultiplier);
-                    linearLift2.setPower(stickHeight * liftMultiplier);
+                    /**if (errorRate > 1){
+                        linearLift.setPower(stickHeight * (2 - errorRate));
+                        linearLift2.setPower(stickHeight);
+                    }
+                    if (errorRate < 1){
+                        linearLift2.setPower(stickHeight * errorRate);
+                        linearLift.setPower(stickHeight);
+                    }*/
+
+                    linearLift.setPower(stickHeight);
+                    linearLift2.setPower(stickHeight);
+
                 } else {
                     linearLift.setPower(0);
                     linearLift2.setPower(0);
                 }
-            } else if (currentPosition >= 0) {
+            } else if ((lin1Height >= 0) && (lin2Height >= 0)) {
                 if (stickHeight < -.25) {
-                    linearLift.setPower(stickHeight * liftMultiplier);
-                    linearLift2.setPower(stickHeight * liftMultiplier);
+                   /** if (errorRate > 1){
+                        linearLift.setPower(stickHeight * (2 - errorRate));
+                        linearLift2.setPower(stickHeight);
+                    }
+                    if (errorRate < 1){
+                        linearLift2.setPower(stickHeight * errorRate);
+                        linearLift.setPower(stickHeight);
+                    }*/
+
+                    linearLift.setPower(stickHeight);
+                    linearLift2.setPower(stickHeight);
                 } else {
                     linearLift.setPower(0);
                     linearLift2.setPower(0);
                 }
             } else {
-                if ((stickHeight > .25) && !(currentPosition >= 0)) {
-                    linearLift.setPower(stickHeight * liftMultiplier);
-                    linearLift2.setPower(stickHeight * liftMultiplier);
-                } else if ((stickHeight < -0.25) && !(currentPosition <= -22400)) {
-                    linearLift.setPower(stickHeight * liftMultiplier);
-                    linearLift2.setPower(stickHeight * liftMultiplier);
+                if ((stickHeight > .25) && !((lin1Height <= goalLiftHeight) && (lin2Height <= goalLiftHeight))) {
+                    /**if (errorRate > 1){
+                        linearLift.setPower(stickHeight * (2 - errorRate));
+                        linearLift2.setPower(stickHeight);
+                    }
+                    if (errorRate < 1){
+                        linearLift2.setPower(stickHeight * errorRate);
+                        linearLift.setPower(stickHeight);
+                    }*/
+                    linearLift.setPower(stickHeight);
+                    linearLift2.setPower(stickHeight);
+                } else if ((stickHeight < -0.25) && !((lin1Height >= 0) && (lin2Height >= 0))) {
+                    /**if (errorRate > 1){
+                        linearLift.setPower(stickHeight * (2 - errorRate));
+                        linearLift2.setPower(stickHeight);
+                    }
+                    if (errorRate < 1){
+                        linearLift2.setPower(stickHeight * errorRate);
+                        linearLift.setPower(stickHeight);
+                    }*/
+                    linearLift.setPower(stickHeight);
+                    linearLift2.setPower(stickHeight);
+                } else{
+                    linearLift.setPower(0);
+                    linearLift2.setPower(0);
                 }
             }
 
 
-            if (((gamepad2.left_trigger > .5) && gamepad2.x)){
+
+            if (leftBumper.wasJustPressed() && (gamepad2.x)) {
+
+                if (!openButton) {
+
+
+
+                    open = !open;
+
+                    openButton = true;
+
+
+
+                } else {
+
+                }
+
+
+
+            } else {
+
+                openButton = false;
+
+            }
+
+
+            if (leftBumper.wasJustPressed() && this.gamepad2.x){
                 if (open){
                     Capstone.setPosition(1);
                 } else if (open == false){
@@ -231,7 +315,7 @@ public class upDownMode extends LinearOpMode {
 
             // Alternative to below if statements
 
-            /*switch (mockGoalLiftHeight) {
+            /**switch (mockGoalLiftHeight) {
                 case 0:
                     goalLiftHeight = 0;
                     break;
@@ -251,39 +335,30 @@ public class upDownMode extends LinearOpMode {
                 default:
                     goalLiftHeight = 0;
                     break;
-            }*/
-
-            if (upButton.wasJustPressed() || downButton.wasJustPressed()){
-                buttonPressed = true;
             }
 
-            if ((mockGoalLiftHeight == 0) && buttonPressed) {
-                goalLiftHeight2 = 0;
+            /**if (leftTrigger.wasJustPressed() || rightTrigger.wasJustPressed()){
+                buttonPressed = true;
+            }*/
+
+            if ((mockGoalLiftHeight == 0)) {
                 goalLiftHeight = 0;
-            } else if ((mockGoalLiftHeight == 1) && buttonPressed) {
-                goalLiftHeight2 = -5600;
-                goalLiftHeight = -5600;
-            } else if ((mockGoalLiftHeight == 2) && buttonPressed) {
-                goalLiftHeight2 = -11200;
-                goalLiftHeight = -11200;
-            } else if ((mockGoalLiftHeight == 3) && buttonPressed) {
-                goalLiftHeight2 = -16800;
-                goalLiftHeight = -16800;
-            } else if ((mockGoalLiftHeight == 4) && buttonPressed) {
-                goalLiftHeight2 = -22400;
-                goalLiftHeight = -22400;
-            }else if ((mockGoalLiftHeight == 5) && buttonPressed) {
-                goalLiftHeight2 = -22400;
-                goalLiftHeight = -22400;
-            }else if ((mockGoalLiftHeight == 6) && buttonPressed) {
-                goalLiftHeight = -22400;
-                goalLiftHeight2 = -22400;
-            }else if ((mockGoalLiftHeight == 7) && buttonPressed) {
-                goalLiftHeight = -22400;
-                goalLiftHeight2 = -22400;
+            } else if ((mockGoalLiftHeight == 1)) {
+                goalLiftHeight = -560;
+            } else if ((mockGoalLiftHeight == 2)) {
+                goalLiftHeight = -1120;
+            } else if ((mockGoalLiftHeight == 3)) {
+                goalLiftHeight = -1680;
+            } else if ((mockGoalLiftHeight == 4)) {
+                goalLiftHeight = -2240;
+            }else if ((mockGoalLiftHeight == 5)) {
+                goalLiftHeight = -2240;
+            }else if ((mockGoalLiftHeight == 6)) {
+                goalLiftHeight = -2240;
+            }else if ((mockGoalLiftHeight == 7)) {
+                goalLiftHeight = -2240;
             } else {
                 goalLiftHeight = linearLift.getCurrentPosition();
-                goalLiftHeight2 = linearLift2.getCurrentPosition();
             }
 
 
@@ -293,19 +368,19 @@ public class upDownMode extends LinearOpMode {
             if (gamepad2.left_stick_button) {
                 linearLift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
                 linearLift2.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-            } else if ((gamepad2.left_stick_y > .25) || (gamepad2.left_stick_y < -.25)){
+            } else { //if((gamepad2.left_stick_y > .25) || (gamepad2.left_stick_y < -.25)){
                 linearLift.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
                 linearLift2.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-                buttonPressed = false;
+                //buttonPressed = false;
 
-            } else {
+            }/** else {
                 linearLift.setTargetPosition(goalLiftHeight);
-                linearLift2.setTargetPosition(goalLiftHeight2);
+                linearLift2.setTargetPosition(goalLiftHeight);
                 linearLift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 linearLift2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 linearLift.setPower(1);
                 linearLift2.setPower(1);
-            }
+            }*/
 
             telemetry.addData("CLAAAAAW position", CLAW.getPosition());
             telemetry.addData("Target Power", speed);
@@ -318,6 +393,11 @@ public class upDownMode extends LinearOpMode {
             telemetry.addData("mockGoalLiftHeight:", mockGoalLiftHeight);
             telemetry.addData("linear lift mode:",linearLift.getMode());
             telemetry.addData("stick height:",gamepad2.left_stick_y);
+            telemetry.addData("open:",open);
+            telemetry.addData("left trigger:",gamepad2.left_trigger);
+            telemetry.addData("x button:",gamepad2.x);
+            telemetry.addData("right trigger pressed:",rightTrigger.wasJustPressed());
+            telemetry.addData("left trigger pressed:",leftTrigger.wasJustPressed());
 
             telemetry.update();
 

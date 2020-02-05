@@ -44,7 +44,7 @@ import static org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocaliz
 //@Disabled
 public class vuforia_testdrive extends LinearOpMode {
 
-    private DcMotor backLeftWheel, backRightWheel, frontLeftWheel, frontRightWheel, linearLift, linearLift2;
+    private DcMotor backLeftWheel, backRightWheel, frontLeftWheel, frontRightWheel;  //linear//Lift,  //linear//Lift2;
     private Servo CLAW, trayServoL, trayServoR;
     BNO055IMU imu;
     Orientation angles;
@@ -55,7 +55,7 @@ public class vuforia_testdrive extends LinearOpMode {
     /**
      * This code (below) sets the parameters for vuforia blocks
      */
-    private static final VuforiaLocalizer.CameraDirection CAMERA_CHOICE = BACK;
+    private static final VuforiaLocalizer.CameraDirection CAMERA_CHOICE = FRONT;
     private static final boolean PHONE_IS_PORTRAIT = true;
 
     /*
@@ -102,6 +102,7 @@ public class vuforia_testdrive extends LinearOpMode {
     private float phoneZRotate = 0;
     private VuforiaBase targetsSkyStone;
     private Iterable<? extends VuforiaTrackable> allTrackables;
+    double rampPower = 0;
 
     /**
      * This code ^ sets the parameters for vuforia blocks
@@ -119,8 +120,8 @@ public class vuforia_testdrive extends LinearOpMode {
         frontLeftWheel = hardwareMap.get(DcMotor.class, "Front_left_wheel");
         frontRightWheel = hardwareMap.get(DcMotor.class, "Front_right_wheel");
         CLAW = hardwareMap.servo.get("CLAW");
-        linearLift = hardwareMap.get(DcMotor.class, "linearLift");
-        linearLift2 = hardwareMap.get(DcMotor.class, "linearLift2");
+         //linear//Lift = hardwareMap.get(DcMotor.class, " //linear//Lift");
+         //linear//Lift2 = hardwareMap.get(DcMotor.class, " //linear//Lift2");
         trayServoL = hardwareMap.get(Servo.class, "trayServoL");
         trayServoR = hardwareMap.get(Servo.class, "trayServoR");
         Distance = hardwareMap.get(DistanceSensor.class, "Distance");
@@ -133,10 +134,14 @@ public class vuforia_testdrive extends LinearOpMode {
         backRightWheel.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         frontLeftWheel.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         frontRightWheel.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        linearLift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        linearLift2.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        linearLift2.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        linearLift.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+         //linear//Lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+         //linear//Lift2.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+         //linear//Lift2.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+         //linear//Lift.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        backLeftWheel.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        backRightWheel.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        frontLeftWheel.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        frontRightWheel.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         Touch.setMode(DigitalChannel.Mode.INPUT);
 
         trayServoR.setPosition(1);
@@ -152,8 +157,8 @@ public class vuforia_testdrive extends LinearOpMode {
         backRightWheel.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         frontLeftWheel.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         frontRightWheel.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        linearLift.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        linearLift2.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+         //linear//Lift.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+         //linear//Lift2.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
 
         //This code ^ virtually tells the vuforia program where everything is
@@ -345,9 +350,11 @@ public class vuforia_testdrive extends LinearOpMode {
 
         targetsSkyStone.activate();
 
-        Drive(400,.7,0,0);
+        //Drive(410,.7,0,0);
 
-        Drive(70,0,.4,0);
+        Drive(230,.7,0,0);
+
+        //Drive(165,0,.4,0);
 
         while (!isStopRequested() && (((positionSkystone != "left") && positionSkystone != "center") && positionSkystone != "right")) {
 
@@ -361,7 +368,7 @@ public class vuforia_testdrive extends LinearOpMode {
                     }
                     targetVisible = true;
 
-                    // getUpdatedRobotLocation() will return null if no new information is available since
+                    // getUpdatedRobotLocation() will return null if no new information is available since @Param
                     // the last time that call was made, or if the trackable is not currently visible.
                     OpenGLMatrix robotLocationTransform = ((VuforiaTrackableDefaultListener) trackable.getListener()).getUpdatedRobotLocation();
                     if (robotLocationTransform != null) {
@@ -379,9 +386,9 @@ public class vuforia_testdrive extends LinearOpMode {
                         translation.get(0) / mmPerInch, translation.get(1) / mmPerInch, translation.get(2) / mmPerInch);
 
                 double yPosition = translation.get(1);
-                if (yPosition >= -6) {
+                if ((2 < yPosition) && (yPosition < 4)) {
                     positionSkystone = "right";
-                } else if (yPosition <= -10) {
+                } else if ((-13.5 < yPosition) && (yPosition < -10.5)) {
                     positionSkystone = "center";
                 }
 
@@ -410,13 +417,13 @@ public class vuforia_testdrive extends LinearOpMode {
 
         //CameraDevice.getInstance().setFlashTorchMode(false);
 
-        if (positionSkystone == "left") {
+/**        if (positionSkystone == "left") {
 
-            Lift(1120,1);
+            //Lift(1120,1);
 
             Drive(560,0,-.7,0);
 
-            Drop(140,.5);
+            //Drop(140,.5);
 
             CLAW.setPosition(0);
             sleep(500);
@@ -428,11 +435,11 @@ public class vuforia_testdrive extends LinearOpMode {
             backup(-200,0,-.7,0);
         } else if (positionSkystone == "center") {
 
-            Lift(1120,1);
+            //Lift(1120,1);
 
             Drive(460,0,-.7,0);
 
-            Drop(140,.5);
+            //Drop(140,.5);
 
             CLAW.setPosition(0);
             sleep(500);
@@ -444,11 +451,11 @@ public class vuforia_testdrive extends LinearOpMode {
             backup(-200,0,-.7,0);
         } else if (positionSkystone == "right") {
 
-            Lift(1120,1);
+            //Lift(1120,1);
 
             Drive(360,0,-.7,0);
 
-            Drop(140,.5);
+            //Drop(140,.5);
 
             CLAW.setPosition(0);
             sleep(500);
@@ -460,7 +467,7 @@ public class vuforia_testdrive extends LinearOpMode {
             backup(-200,0,-.7,0);
         }
 
-        Lift(840, 1);
+        //Lift(840, 1);
 
         DrivewDistance(8, .5, 0, 90);
         Drive(32, .4, 0, 90);
@@ -470,16 +477,16 @@ public class vuforia_testdrive extends LinearOpMode {
         sleep(500);
 
         DrivewTouch(-1, 0, 90, 3);
-        Drop(0, .5);
+        //Drop(0, .5);
         CLAW.setPosition(1);
-        Lift(1320, 1);
+        //Lift(1320, 1);
 
         trayServoL.setPosition(0);
         trayServoR.setPosition(1);
 
         Drive(32, .5, 0, 90);
         Drive(500, 0, 1, 90);
-        Drop(0, .5);
+        //Drop(0, .5);
         Drive(140, .7, 0, 90);
         Drive(280, 0, -.7, 90);
         Drive(500, 0, 1, 90);
@@ -488,10 +495,10 @@ public class vuforia_testdrive extends LinearOpMode {
 
         sleep(1000);
 
-        runtime.reset();
+        runtime.reset();*/
     }
 
-    public void Drive(int distance, double straight, double strafe, int target) throws InterruptedException {
+    public void Drive ( int distance, double straight, double strafe, int target) throws InterruptedException {
 
         double backleftSpeed, backrightSpeed, frontleftSpeed, frontrightSpeed;
 
@@ -507,8 +514,39 @@ public class vuforia_testdrive extends LinearOpMode {
         double frontLPower = straight + strafe;
         double backRPower = straight + strafe;
         double backLPower = straight - strafe;
-
+        boolean rampUp = true;
+        boolean rampDown = false;
         while (((backLeftWheel.getCurrentPosition() < (distance + startPosition)) && (backRightWheel.getCurrentPosition() < (distance + startPosition))) && !isStopRequested()) {
+            if((startPosition < backLeftWheel.getCurrentPosition()) &&(backLeftWheel.getCurrentPosition() < startPosition + 70)){
+                rampUp = true;
+                rampDown = false;
+            }else if ((((distance + startPosition) - 210) < backLeftWheel.getCurrentPosition()) && (backLeftWheel.getCurrentPosition() < (distance + startPosition))){
+                rampDown = true;
+                rampUp = false;
+            }
+
+
+            if (rampUp == true){
+                rampPower += .15;
+                sleep(5);
+
+                if (rampPower >= 1){
+                    rampUp = false;
+                    rampPower = 1;
+                }
+            } else if (rampDown) {
+                rampPower -= .15;
+                sleep(5);
+                if (rampPower <= .3){
+                    rampDown = ! rampDown;
+                    rampPower = .3;
+                }
+            } else{
+                rampPower = 1;
+            }
+
+
+
             angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
             double currentHeading = angles.firstAngle;
 
@@ -525,15 +563,16 @@ public class vuforia_testdrive extends LinearOpMode {
             frontrightSpeed = Range.clip(frontrightSpeed, -1, 1);
 
 
-            backLeftWheel.setPower(backleftSpeed);
-            frontLeftWheel.setPower(frontleftSpeed);
-            backRightWheel.setPower(backrightSpeed);
-            frontRightWheel.setPower(frontrightSpeed);
+            backLeftWheel.setPower(backleftSpeed * rampPower);
+            frontLeftWheel.setPower(frontleftSpeed * rampPower);
+            backRightWheel.setPower(backrightSpeed * rampPower);
+            frontRightWheel.setPower(frontrightSpeed * rampPower);
 
 
             angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
             telemetry.addData("current heading:", angles.firstAngle);
             telemetry.addData("desired heading:", startPosition);
+            telemetry.addData("motor speed:", backLeftWheel.getPower());
         }
 
         backLeftWheel.setPower(0);
@@ -544,23 +583,23 @@ public class vuforia_testdrive extends LinearOpMode {
 
     }
 
-    public void Lift(int Height, double power) throws InterruptedException {
-        while ((linearLift.getCurrentPosition() >= -Height) && !isStopRequested()) {
-            linearLift.setPower(-power);
-            linearLift2.setPower(-power);
+   /** public void //Lift(int Height, double power) throws InterruptedException {
+        while (()) //linear//Lift.getCurrentPosition() >= -Height) && !isStopRequested()){
+             //linear////Lift.setPower(-power);
+             //linear//Lift2.setPower(-power);
         }
-        linearLift.setPower(0);
-        linearLift2.setPower(0);
-    }
+         //linear//Lift.setPower(0);
+         //linear//Lift2.setPower(0);
+    
 
-    public void Drop(int Height, double power) throws InterruptedException {
-        while ((linearLift.getCurrentPosition() <= -Height) && !isStopRequested()) {
-            linearLift.setPower(power);
-            linearLift2.setPower(power);
+    public void ////Drop(int Height, double power) throws InterruptedException {
+        while (( //linear//Lift.getCurrentPosition() <= -Height) && !isStopRequested()) {
+             //linear//Lift.setPower(power);
+             //linear//Lift2.setPower(power);
         }
-        linearLift.setPower(0);
-        linearLift2.setPower(0);
-    }
+         //linear//Lift.setPower(0);
+         //linear//Lift2.setPower(0);
+    }*/
 
     public void backup(int distance, double straight, double strafe, int target) throws InterruptedException {
 

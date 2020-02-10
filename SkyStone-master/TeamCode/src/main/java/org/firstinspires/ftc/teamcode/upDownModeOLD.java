@@ -87,6 +87,7 @@ public class upDownModeOLD extends LinearOpMode {
     boolean open;
 
     double totalTicks;
+    boolean openButton = false;
 
 
 
@@ -264,7 +265,7 @@ public class upDownModeOLD extends LinearOpMode {
 
 
 
-                CLAW.setPosition(0);
+                CLAW.setPosition(1);
 
 
 
@@ -272,7 +273,7 @@ public class upDownModeOLD extends LinearOpMode {
 
 
 
-                CLAW.setPosition(1);
+                CLAW.setPosition(0);
 
 
 
@@ -328,13 +329,13 @@ public class upDownModeOLD extends LinearOpMode {
 
 
 
-            if (currentPosition <= -50000) {
+            if (currentPosition <= -4700) {
 
                 if (stickHeight > .25) {
 
-                    linearLift.setPower(stickHeight * liftMultiplier);
+                    linearLift.setPower(stickHeight /** liftMultiplier*/);
 
-                    linearLift2.setPower(stickHeight * liftMultiplier);
+                    linearLift2.setPower(stickHeight /** liftMultiplier*/);
 
                 } else {
 
@@ -344,13 +345,13 @@ public class upDownModeOLD extends LinearOpMode {
 
                 }
 
-            } else if (currentPosition >= -100) {
+            } else if (currentPosition >= 0) {
 
                 if (stickHeight < -.25) {
 
-                    linearLift.setPower(stickHeight * liftMultiplier);
+                    linearLift.setPower(stickHeight /** liftMultiplier*/);
 
-                    linearLift2.setPower(stickHeight * liftMultiplier);
+                    linearLift2.setPower(stickHeight /** liftMultiplier*/);
 
                 } else {
 
@@ -362,17 +363,17 @@ public class upDownModeOLD extends LinearOpMode {
 
             } else {
 
-                if ((stickHeight > .25) && !(currentPosition >= 0)) {
+                if ((stickHeight > .25) /**&& !(currentPosition >= 0)*/) {
 
-                    linearLift.setPower(stickHeight * liftMultiplier);
+                    linearLift.setPower(stickHeight /** liftMultiplier*/);
 
-                    linearLift2.setPower(stickHeight * liftMultiplier);
+                    linearLift2.setPower(stickHeight /** liftMultiplier*/);
 
-                } else if ((stickHeight < -0.25) && !(currentPosition <= -50000)) {
+                } else if ((stickHeight < -0.25) /**&& !(currentPosition <= -1600)*/) {
 
-                    linearLift.setPower(stickHeight * liftMultiplier);
+                    linearLift.setPower(stickHeight/** * liftMultiplier*/);
 
-                    linearLift2.setPower(stickHeight * liftMultiplier);
+                    linearLift2.setPower(stickHeight/** * liftMultiplier*/);
 
                 } else {
 
@@ -386,7 +387,7 @@ public class upDownModeOLD extends LinearOpMode {
 
 
 
-            if ((this.gamepad2.left_trigger > .5) && (gamepad2.x)) {
+           /** if ((this.gamepad2.left_trigger > .5) && (gamepad2.x)) {
 
                 if (!upButton) {
 
@@ -408,11 +409,11 @@ public class upDownModeOLD extends LinearOpMode {
 
                 upButton = false;
 
-            }
+            }*/
 
 
 
-            if (((gamepad2.left_trigger > .5) && gamepad2.x)){
+            /**if (((gamepad2.left_trigger > .5) && gamepad2.x)){
 
                 if (open){
 
@@ -430,7 +431,7 @@ public class upDownModeOLD extends LinearOpMode {
 
                 Capstone.setPosition(0);
 
-            }
+            }*/
 
 
 
@@ -740,9 +741,43 @@ public class upDownModeOLD extends LinearOpMode {
 
             }
 
+            if (gamepad2.left_bumper && (gamepad2.x)) {
+
+                if (!openButton) {
 
 
-            telemetry.addData("CLAAAAAW position", CLAW.getPosition());
+
+                    open = !open;
+
+                    openButton = true;
+
+
+
+                } else {
+
+                }
+
+
+
+            } else {
+
+                openButton = false;
+
+            }
+
+
+            if (gamepad2.left_bumper && this.gamepad2.x) {
+                if (open) {
+                    Capstone.setPosition(0);
+                } else if (open == false) {
+                    Capstone.setPosition(1);
+                }
+            }
+
+
+
+
+                telemetry.addData("CLAAAAAW position", CLAW.getPosition());
 
             telemetry.addData("Target Power", speed);
 

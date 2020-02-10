@@ -20,6 +20,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.DcMotor.ZeroPowerBehavior;
 
 
+import org.firstinspires.ftc.robotcore.external.android.AndroidTextToSpeech;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
 
@@ -104,7 +105,7 @@ public class upDownMode extends LinearOpMode {
         CLAW.setPosition(0);
         trayServoL.setPosition(0);
         trayServoR.setPosition(1);
-        Capstone.setPosition(0);
+        Capstone.setPosition(1);
 
         telemetry.addData("Status", "Initialized");
 
@@ -157,11 +158,11 @@ public class upDownMode extends LinearOpMode {
             // CLAAAAW code
             if (this.gamepad2.a) {
 
-                CLAW.setPosition(0);
+                CLAW.setPosition(1);
 
             } else if (this.gamepad2.y) {
 
-                CLAW.setPosition(1);
+                CLAW.setPosition(0);
 
             }
 
@@ -199,7 +200,7 @@ public class upDownMode extends LinearOpMode {
 
             double stickHeight = this.gamepad2.left_stick_y;
 
-            if ((lin1Height <= goalLiftHeight) && (lin2Height <= goalLiftHeight)) {
+            if ((lin1Height <= -1600) && (lin2Height <= -1600)) {
                 if (stickHeight > .25) {
                     /**if (errorRate > 1){
                         linearLift.setPower(stickHeight * (2 - errorRate));
@@ -235,7 +236,7 @@ public class upDownMode extends LinearOpMode {
                     linearLift2.setPower(0);
                 }
             } else {
-                if ((stickHeight > .25) && !((lin1Height <= goalLiftHeight) && (lin2Height <= goalLiftHeight))) {
+                if ((stickHeight > .25) && !((lin1Height <= -1600) && (lin2Height <= -1600))) {
                     /**if (errorRate > 1){
                         linearLift.setPower(stickHeight * (2 - errorRate));
                         linearLift2.setPower(stickHeight);
@@ -265,7 +266,7 @@ public class upDownMode extends LinearOpMode {
 
 
 
-            if (leftBumper.wasJustPressed() && (gamepad2.x)) {
+            if (gamepad2.left_bumper && (gamepad2.x)) {
 
                 if (!openButton) {
 
@@ -290,22 +291,22 @@ public class upDownMode extends LinearOpMode {
             }
 
 
-            if (leftBumper.wasJustPressed() && this.gamepad2.x){
+            if (gamepad2.left_bumper && this.gamepad2.x){
                 if (open){
-                    Capstone.setPosition(1);
-                } else if (open == false){
                     Capstone.setPosition(0);
+                } else if (open == false){
+                    Capstone.setPosition(1);
                 }
 
             }
 
 
 
-            if (upButton.wasJustPressed()) {
+            /**if (rightBumper.wasJustPressed()) {
                 mockGoalLiftHeight++;
-            } else if (downButton.wasJustPressed()) {
+            } else if (leftBumper.wasJustPressed()) {
                 mockGoalLiftHeight -= 1;
-            }
+            }*/
 
             if (mockGoalLiftHeight > 7) {
                 mockGoalLiftHeight = 7;
@@ -382,7 +383,7 @@ public class upDownMode extends LinearOpMode {
                 linearLift2.setPower(1);
             }*/
 
-            telemetry.addData("CLAAAAAW position", CLAW.getPosition());
+            /**telemetry.addData("CLAAAAAW position", CLAW.getPosition());
             telemetry.addData("Target Power", speed);
             telemetry.addData("Motor Power", backLeftWheel.getPower());
             telemetry.addData("Status", "Running");
@@ -398,7 +399,9 @@ public class upDownMode extends LinearOpMode {
             telemetry.addData("x button:",gamepad2.x);
             telemetry.addData("right trigger pressed:",rightTrigger.wasJustPressed());
             telemetry.addData("left trigger pressed:",leftTrigger.wasJustPressed());
+*/
 
+            telemetry.addData("station height:",mockGoalLiftHeight);
             telemetry.update();
 
 

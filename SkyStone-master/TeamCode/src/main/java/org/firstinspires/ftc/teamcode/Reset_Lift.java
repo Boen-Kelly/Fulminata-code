@@ -32,6 +32,9 @@ public class Reset_Lift extends LinearOpMode {
         a = new ButtonReader(operatorgamepad,GamepadKeys.Button.A);
         b = new ButtonReader(operatorgamepad,GamepadKeys.Button.B);
 
+        telemetry.addLine("Initialied");
+        telemetry.update();
+
         waitForStart();
 
         while (opModeIsActive()){

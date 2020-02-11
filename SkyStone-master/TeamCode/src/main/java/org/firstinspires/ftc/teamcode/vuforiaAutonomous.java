@@ -53,6 +53,9 @@ public class vuforiaAutonomous extends LinearOpMode {
     private ElapsedTime runtime = new ElapsedTime();
     OpenGLMatrix robotLocationTransform;
     VuforiaTrackableDefaultListener listener;
+    VectorF trans;
+    Orientation rot;
+    boolean targetNotSeen = true;
 
 
 
@@ -107,6 +110,7 @@ public class vuforiaAutonomous extends LinearOpMode {
     private VuforiaBase targetsSkyStone;
     private Iterable<? extends VuforiaTrackable> allTrackables;
     double rampPower = 0;
+    boolean closeEnough = false;
 
     /**
      * This code ^ sets the parameters for vuforia blocks
@@ -175,6 +179,7 @@ public class vuforiaAutonomous extends LinearOpMode {
 
         vuforiaparameters.vuforiaLicenseKey = VUFORIA_KEY;
         vuforiaparameters.cameraDirection = CAMERA_CHOICE;
+        vuforiaparameters.useExtendedTracking = false;
 
         //  Instantiate the Vuforia engine
         vuforia = ClassFactory.getInstance().createVuforia(vuforiaparameters);
@@ -317,9 +322,9 @@ public class vuforiaAutonomous extends LinearOpMode {
 
         // Next, translate the camera lens to where it is on the robot.
         // In this example, it is centered (left to right), but forward of the middle of the robot, and above ground level.
-        final float CAMERA_FORWARD_DISPLACEMENT = 4.0f * mmPerInch;   // eg: Camera is 4 Inches in front of robot center
+        final float CAMERA_FORWARD_DISPLACEMENT = 180;   // eg: Camera is 4 Inches in front of robot center
         final float CAMERA_VERTICAL_DISPLACEMENT = 5.93f * mmPerInch;   // eg: Camera is 5.93 Inches above ground when portrait, and 7.6875 when landscape
-        final float CAMERA_LEFT_DISPLACEMENT = 0;     // eg: Camera is ON the robot's center line
+        final float CAMERA_LEFT_DISPLACEMENT = -60;     // eg: Camera is ON the robot's center line
 
         OpenGLMatrix robotFromCamera = OpenGLMatrix
                 .translation(CAMERA_FORWARD_DISPLACEMENT, CAMERA_LEFT_DISPLACEMENT, CAMERA_VERTICAL_DISPLACEMENT)
@@ -354,9 +359,12 @@ public class vuforiaAutonomous extends LinearOpMode {
 
         targetsSkyStone.activate();
 
+
+
         //Drive(410,.7,0,0);
 
-        Drive(430,.7,0,0);
+        DrivewOutRamp(70,0,.4,0);
+        Drive(430,1,0,0);
 
         //Drive(165,0,.4,0);
 
@@ -373,7 +381,7 @@ public class vuforiaAutonomous extends LinearOpMode {
 
         while (!isStopRequested() && !targetVisible && ((backLeftWheel.getCurrentPosition() > (-240 + startPosition)) && (backRightWheel.getCurrentPosition() > (-240 + startPosition)))) {
 
-            targetVisible = false;
+            /**targetVisible = false;
             for (VuforiaTrackable trackable : allTrackables) {
                 if (((VuforiaTrackableDefaultListener) trackable.getListener()).isVisible()) {
                     telemetry.addData("Visible Target", trackable.getName());
@@ -387,9 +395,56 @@ public class vuforiaAutonomous extends LinearOpMode {
                     }
                     break;
                 }
+            }*/
+
+            targetVisible = false;
+            for (VuforiaTrackable trackable : allTrackables) {
+                if (((VuforiaTrackableDefaultListener)trackable.getListener()).isVisible()) {
+                    telemetry.addData("Visible Target", trackable.getName());
+                    targetVisible = true;
+
+                    // getUpdatedRobotLocation() will return null if no new information is available since
+                    // the last time that call was made, or if the trackable is not currently visible.
+                    OpenGLMatrix robotLocationTransform = ((VuforiaTrackableDefaultListener)trackable.getListener()).getUpdatedRobotLocation();
+                    if (robotLocationTransform != null) {
+                        lastLocation = robotLocationTransform;
+                    }
+                    break;
+                }
             }
 
+            // Provide feedback as to where the robot is located (if we know).
+            if (targetVisible) {
+                // express position (translation) of robot in inches.
+
+                VuforiaTrackableDefaultListener listener = (VuforiaTrackableDefaultListener) stoneTarget.getListener();
+                OpenGLMatrix location;
+                VectorF translation = lastLocation.getTranslation();
+
+                if ((stoneTarget != null) && (listener != null) && listener.isVisible()){
+                    location = listener.getUpdatedRobotLocation();
+                    if (location != null){
+                        VectorF trans = location.getTranslation();
+                        Orientation rot = Orientation.getOrientation(location, EXTRINSIC, XYZ, DEGREES);
+
+                        telemetry.addData("y translation:", trans.get(1));
+                    }
+                }
+                telemetry.addData("Pos (in)", "{X, Y, Z} = %.1f, %.1f, %.1f",
+                        translation.get(0) / mmPerInch, translation.get(1) / mmPerInch, translation.get(2) / mmPerInch);
+
+                // express the rotation of the robot in degrees.
+                Orientation rotation = Orientation.getOrientation(lastLocation, EXTRINSIC, XYZ, DEGREES);
+                telemetry.addData("Rot (deg)", "{Roll, Pitch, Heading} = %.0f, %.0f, %.0f", rotation.firstAngle, rotation.secondAngle, rotation.thirdAngle);
+            }
+            else {
+                telemetry.addData("Visible Target", "none");
+            }
+            telemetry.update();
+
+
             if (targetVisible){
+                targetNotSeen = false;
                 break;
             }else{
                 angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
@@ -412,14 +467,20 @@ public class vuforiaAutonomous extends LinearOpMode {
                 frontLeftWheel.setPower(frontleftSpeed);
                 backRightWheel.setPower(backrightSpeed);
                 frontRightWheel.setPower(frontrightSpeed);
+                targetNotSeen = true;
             }
         }
 
+        backLeftWheel.setPower(0);
+        backRightWheel.setPower(0);
+        frontLeftWheel.setPower(0);
+        frontRightWheel.setPower(0);
+
         int endPosition = backLeftWheel.getCurrentPosition();
 
-        if ((startPosition <= endPosition) && (endPosition <= (startPosition + 80))){
+        if ((startPosition <= endPosition) && (endPosition <= (startPosition + 30))){
             positionSkystone = "right";
-        } else if (((startPosition + 80) <= endPosition) && (endPosition <= (startPosition + 160))){
+        } else if (((startPosition + 50) <= endPosition) && (endPosition <= (startPosition + 110))){
             positionSkystone = "center";
         } else if ((startPosition + 160) <= endPosition){
             positionSkystone = "left";
@@ -427,49 +488,186 @@ public class vuforiaAutonomous extends LinearOpMode {
             positionSkystone = "left";
         }
 
-        Drive(270,.7,0,0);
+        //Drive(270,.7,0,0);
 
 
+
+        if (!targetNotSeen) {
+            while (!closeEnough && !isStopRequested()) {
+
+                targetVisible = false;
+                for (VuforiaTrackable trackable : allTrackables) {
+                    if (((VuforiaTrackableDefaultListener) trackable.getListener()).isVisible()) {
+                        telemetry.addData("Visible Target", trackable.getName());
+                        targetVisible = true;
+
+                        // getUpdatedRobotLocation() will return null if no new information is available since
+                        // the last time that call was made, or if the trackable is not currently visible.
+                        OpenGLMatrix robotLocationTransform = ((VuforiaTrackableDefaultListener) trackable.getListener()).getUpdatedRobotLocation();
+                        if (robotLocationTransform != null) {
+                            lastLocation = robotLocationTransform;
+                        }
+                        break;
+                    }
+                }
+
+                // Provide feedback as to where the robot is located (if we know).
+                if (targetVisible && !closeEnough) {
+                    // express position (translation) of robot in inches.
+
+                    VuforiaTrackableDefaultListener listener = (VuforiaTrackableDefaultListener) stoneTarget.getListener();
+                    listener.addTrackable(stoneTarget);
+                    //VuforiaTrackable listining = stoneTarget;
+                    //listining.getListener();
+                    OpenGLMatrix location;
+                    VectorF translation = lastLocation.getTranslation();
+
+                    if ((stoneTarget != null) && (listener != null) && listener.isVisible()) {
+                        location = listener.getRobotLocation();
+                        if (location != null) {
+                            trans = location.getTranslation();
+                            rot = Orientation.getOrientation(location, EXTRINSIC, XYZ, DEGREES);
+                            //telemetry.update();
+                        }
+                    }
+                    telemetry.addData("Pos (in)", "{X, Y, Z} = %.1f, %.1f, %.1f",
+                            translation.get(0) / mmPerInch, translation.get(1) / mmPerInch, translation.get(2) / mmPerInch);
+
+                    // express the rotation of the robot in degrees.
+                    Orientation rotation = Orientation.getOrientation(lastLocation, EXTRINSIC, XYZ, DEGREES);
+                    telemetry.addData("Rot (deg)", "{Roll, Pitch, Heading} = %.0f, %.0f, %.0f", rotation.firstAngle, rotation.secondAngle, rotation.thirdAngle);
+                    telemetry.addData("y translation:", trans.get(1));
+
+                    double actualTransY = trans.get(1);
+                    double actualTransX = trans.get(0);
+                    //double actualRot =  -rot.thirdAngle;
+                    double correctionY = (0 - actualTransY) / 100;
+                    double correctionX = (460 - actualTransX) / 1500;
+                    //double correctionRot = (0 - actualRot)/100;
+
+                    if ((Math.abs(correctionX) <= .2) && !((-500 <= actualTransX) && (actualTransX >= 0))) {
+                        correctionX = .2;
+                    }
+                    if ((Math.abs(correctionY) <= .2) && !(-100 < actualTransY) && (actualTransY < 100)) {
+                        correctionY = .2;
+                    }
+                    /**if ((Math.abs(correctionRot) < .2) && ((-10 < actualRot) && (actualRot < 10))){
+                     correctionRot = .2;
+                     }*/
+
+
+                    double frontRightPower = correctionX + correctionY;
+                    double frontLeftPower = correctionX - correctionY;
+                    double backRightPower = correctionX - correctionY;
+                    double backLeftPower = correctionX + correctionY;
+
+                    frontRPower = Range.clip(frontRPower, -1, 1);
+                    frontLPower = Range.clip(frontLPower, -1, 1);
+                    backRPower = Range.clip(backRPower, -1, 1);
+                    backLPower = Range.clip(backLPower, -1, 1);
+
+                    backLeftWheel.setPower(backLeftPower);
+                    backRightWheel.setPower(backRightPower);
+                    frontLeftWheel.setPower(frontLeftPower);
+                    frontRightWheel.setPower(frontRightPower);
+                    telemetry.addData("correction y rate:", correctionY);
+                    telemetry.addData("correction x rate:", correctionX);
+                    telemetry.addData("x axis actual:", actualTransX);
+                    telemetry.addData("y axis actual:", actualTransY);
+
+
+                    if (((-460 <= actualTransX) && (actualTransX <= 0)) && ((-10 <= actualTransY) && (actualTransY <= 10))) {
+                        closeEnough = true;
+                    } else {
+                        closeEnough = false;
+                    }
+                } else {
+                    telemetry.addData("Visible Target", "none");
+                    backLeftWheel.setPower(0);
+                    frontLeftWheel.setPower(0);
+                    backRightWheel.setPower(0);
+                    frontRightWheel.setPower(0);
+                }
+                telemetry.update();
+
+
+            }
+        }
+
+        backLeftWheel.setPower(0);
+        frontLeftWheel.setPower(0);
+        backRightWheel.setPower(0);
+        frontRightWheel.setPower(0);
 
         //drivewVuforia(stoneTarget,0,-.3,1120,0);
 
 
 
         telemetry.addData("Skystone position:", positionSkystone);
-        telemetry.addData("wheel mowement:", endPosition);
+        telemetry.addData("wheel movement:", endPosition);
         telemetry.addData("start position:",startPosition);
         telemetry.update();
-        sleep(50000);
+        sleep(2000);
         targetsSkyStone.deactivate();
 
         //CameraDevice.getInstance().setFlashTorchMode(false);
 
-        if (positionSkystone == "right"){
+        if (positionSkystone.equals("right")){
             CLAW.setPosition(0);
-            Drive(70,0,.5,0);
-            Drive(70,.5,0,0);
+            //DrivewOutRamp(90,0,.5,0);
+            DrivewOutRamp(70,.5,0,0);
             CLAW.setPosition(1);
-            backup(-70,-.5,0,0);
-            backup(-200,0,-.7,90);
-            backup(-1210,0,-.9,90);
-            backup(-200,0,-.7,90);
-        } else if (positionSkystone == "center"){
+            backupwOutRamp(-70,-.5,0,0);
+            //backup(-200,0,-.7,0);
+            backup(-2010,0,-1,0);
+            //backup(-200,0,-.7,0);
+        } else if (positionSkystone.equals("center")){
             CLAW.setPosition(0);
-            Drive(70,.5,0,0);
+            DrivewOutRamp(70,.5,0,0);
             CLAW.setPosition(1);
-            backup(-70,-.5,0,0);
-            backup(-200,0,-.7,90);
-            backup(-1130,0,-.9,90);
-            backup(-200,0,-.7,90);
-        }else if (positionSkystone == "left"){
+            backupwOutRamp(-70,-.5,0,0);
+            //backup(-200,0,-.7,90);
+            backup(-1730,0,-1,0);
+            //backup(-200,0,-.7,90);
+        }else if (positionSkystone.equals("left")){
             CLAW.setPosition(0);
-            Drive(70,.5,0,0);
+            DrivewOutRamp(70,.5,0,0);
             CLAW.setPosition(1);
-            backup(-70,-.5,0,0);
-            backup(-200,0,-.7,90);
-            backup(-1050,0,-.9,90);
-            backup(-200,0,-.7,90);
+            backupwOutRamp(-70,-.5,0,0);
+            //backup(-200,0,-.7,90);
+            backup(-1650,0,-1,0);
+            //backup(-200,0,-.7,90);
         }
+
+        DrivewDistance(6,.5,0,0);
+        DrivewOutRamp(32,.4,0,0);
+
+        trayServoL.setPosition(1);
+        trayServoR.setPosition(0);
+        sleep(500);
+
+        DrivewTouch(-1,0,0,3);
+        //Drop(320,.5);
+        CLAW.setPosition(1);
+        //Lift(1320,1);
+
+        trayServoL.setPosition(0);
+        trayServoR.setPosition(1);
+
+        DrivewOutRamp(32,.5,0,0);
+        Drive(500,0,1,0);
+        //Drop(0,.5);
+        Drive(200,.7,0,0);
+        backup(-280,0,-.7,0);
+        backupwOutRamp(-240,-1,0,0);
+        DrivewOutRamp(70,.4,0,0);
+        Drive(710,0,1,0);
+
+        CLAW.setPosition(0);
+
+        sleep(1000);
+
+
     }
 
     public void Drive ( int distance, double straight, double strafe, int target) throws InterruptedException {
@@ -577,6 +775,7 @@ public class vuforiaAutonomous extends LinearOpMode {
 
     public void backup(int distance, double straight, double strafe, int target) throws InterruptedException {
 
+
         double backleftSpeed, backrightSpeed, frontleftSpeed, frontrightSpeed;
 
 
@@ -591,8 +790,39 @@ public class vuforiaAutonomous extends LinearOpMode {
         double frontLPower = straight + strafe;
         double backRPower = straight + strafe;
         double backLPower = straight - strafe;
-
+        boolean rampUp = true;
+        boolean rampDown = false;
         while (((backLeftWheel.getCurrentPosition() > (distance + startPosition)) && (backRightWheel.getCurrentPosition() > (distance + startPosition))) && !isStopRequested()) {
+            if((startPosition > backLeftWheel.getCurrentPosition()) &&(backLeftWheel.getCurrentPosition() > startPosition - 70)){
+                rampUp = true;
+                rampDown = false;
+            }else if ((((distance + startPosition) + 180) > backLeftWheel.getCurrentPosition()) && (backLeftWheel.getCurrentPosition() > (distance + startPosition))){
+                rampDown = true;
+                rampUp = false;
+            }
+
+
+            if (rampUp == true){
+                rampPower += .15;
+                sleep(5);
+
+                if (rampPower >= 1){
+                    rampUp = false;
+                    rampPower = 1;
+                }
+            } else if (rampDown) {
+                rampPower -= .15;
+                sleep(5);
+                if (rampPower <= .3){
+                    rampDown = ! rampDown;
+                    rampPower = .3;
+                }
+            } else{
+                rampPower = 1;
+            }
+
+
+
             angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
             double currentHeading = angles.firstAngle;
 
@@ -609,21 +839,23 @@ public class vuforiaAutonomous extends LinearOpMode {
             frontrightSpeed = Range.clip(frontrightSpeed, -1, 1);
 
 
-            backLeftWheel.setPower(backleftSpeed);
-            frontLeftWheel.setPower(frontleftSpeed);
-            backRightWheel.setPower(backrightSpeed);
-            frontRightWheel.setPower(frontrightSpeed);
+            backLeftWheel.setPower(backleftSpeed * rampPower);
+            frontLeftWheel.setPower(frontleftSpeed * rampPower);
+            backRightWheel.setPower(backrightSpeed * rampPower);
+            frontRightWheel.setPower(frontrightSpeed * rampPower);
 
 
             angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
             telemetry.addData("current heading:", angles.firstAngle);
             telemetry.addData("desired heading:", startPosition);
+            telemetry.addData("motor speed:", backLeftWheel.getPower());
         }
 
         backLeftWheel.setPower(0);
         frontLeftWheel.setPower(0);
         backRightWheel.setPower(0);
         frontRightWheel.setPower(0);
+
 
 
     }
@@ -769,7 +1001,7 @@ public class vuforiaAutonomous extends LinearOpMode {
         double backLPower = straight - strafe;
         double timeLimit = runtime.time() + seconds;
 
-        while (((Touch.getState() == true) && !isStopRequested()) && runtime.time() < timeLimit) {
+        while (((Touch.getState() == true) && !isStopRequested()) && (runtime.time() < timeLimit)) {
             angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
             double currentHeading = angles.firstAngle;
 
@@ -1019,6 +1251,112 @@ public class vuforiaAutonomous extends LinearOpMode {
         backRightWheel.setPower(0);
         frontLeftWheel.setPower(0);
         frontRightWheel.setPower(0);
+
+    }
+
+    public void DrivewOutRamp(int distance,double straight,double strafe, double target){
+
+        double backleftSpeed,backrightSpeed,frontleftSpeed,frontrightSpeed;
+
+
+        backLeftWheel.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        backRightWheel.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        backLeftWheel.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        backRightWheel.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+        //double target = angles.firstAngle;
+        double startPosition = backLeftWheel.getCurrentPosition();
+        double frontRPower = straight - strafe;
+        double frontLPower = straight + strafe;
+        double backRPower = straight + strafe;
+        double backLPower  = straight - strafe;
+
+        while (((backLeftWheel.getCurrentPosition() < (distance + startPosition)) && (backRightWheel.getCurrentPosition() < (distance + startPosition))) && !isStopRequested()){
+            angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+            double currentHeading = angles.firstAngle;
+
+            double correction = (target - currentHeading)/100;
+
+            backleftSpeed = backLPower - (correction * 2);
+            backrightSpeed = backRPower + (correction * 2);
+            frontleftSpeed = frontLPower - (correction * 2);
+            frontrightSpeed = frontRPower + (correction * 2);
+
+            backrightSpeed = Range.clip (backrightSpeed,-1,1);
+            backleftSpeed = Range.clip (backleftSpeed,-1,1);
+            frontleftSpeed = Range.clip (frontleftSpeed,-1,1);
+            frontrightSpeed = Range.clip(frontrightSpeed,-1,1);
+
+
+            backLeftWheel.setPower(backleftSpeed);
+            frontLeftWheel.setPower(frontleftSpeed);
+            backRightWheel.setPower(backrightSpeed);
+            frontRightWheel.setPower(frontrightSpeed);
+
+
+            angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+            telemetry.addData("current heading:", angles.firstAngle);
+            telemetry.addData("desired heading:", startPosition);
+        }
+
+        backLeftWheel.setPower(0);
+        frontLeftWheel.setPower(0);
+        backRightWheel.setPower(0);
+        frontRightWheel.setPower(0);
+
+
+    }
+
+    public void backupwOutRamp(int distance,double straight,double strafe, double target){
+
+        double backleftSpeed,backrightSpeed,frontleftSpeed,frontrightSpeed;
+
+
+        backLeftWheel.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        backRightWheel.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        backLeftWheel.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        backRightWheel.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+        //double target = angles.firstAngle;
+        double startPosition = backLeftWheel.getCurrentPosition();
+        double frontRPower = straight - strafe;
+        double frontLPower = straight + strafe;
+        double backRPower = straight + strafe;
+        double backLPower  = straight - strafe;
+
+        while (((backLeftWheel.getCurrentPosition() > (distance + startPosition)) && (backRightWheel.getCurrentPosition() > (distance + startPosition))) && !isStopRequested()){
+            angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+            double currentHeading = angles.firstAngle;
+
+            double correction = (target - currentHeading)/100;
+
+            backleftSpeed = backLPower - (correction * 2);
+            backrightSpeed = backRPower + (correction * 2);
+            frontleftSpeed = frontLPower - (correction * 2);
+            frontrightSpeed = frontRPower + (correction * 2);
+
+            backrightSpeed = Range.clip (backrightSpeed,-1,1);
+            backleftSpeed = Range.clip (backleftSpeed,-1,1);
+            frontleftSpeed = Range.clip (frontleftSpeed,-1,1);
+            frontrightSpeed = Range.clip(frontrightSpeed,-1,1);
+
+
+            backLeftWheel.setPower(backleftSpeed);
+            frontLeftWheel.setPower(frontleftSpeed);
+            backRightWheel.setPower(backrightSpeed);
+            frontRightWheel.setPower(frontrightSpeed);
+
+
+            angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+            telemetry.addData("current heading:", angles.firstAngle);
+            telemetry.addData("desired heading:", startPosition);
+        }
+
+        backLeftWheel.setPower(0);
+        frontLeftWheel.setPower(0);
+        backRightWheel.setPower(0);
+        frontRightWheel.setPower(0);
+
 
     }
 }

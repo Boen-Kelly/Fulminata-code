@@ -9,6 +9,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.hardware.Servo;
 
 @TeleOp (name = "linear lift reset")
 public class Reset_Lift extends LinearOpMode {
@@ -18,6 +19,7 @@ public class Reset_Lift extends LinearOpMode {
     private GamepadEx operatorgamepad;
     private TriggerReader leftTrigger,rightTrigger;
     private ButtonReader x,y,a,b;
+    Servo Claw;
 
     @Override
     public void runOpMode()throws InterruptedException{
@@ -31,6 +33,7 @@ public class Reset_Lift extends LinearOpMode {
         y = new ButtonReader(operatorgamepad,GamepadKeys.Button.Y);
         a = new ButtonReader(operatorgamepad,GamepadKeys.Button.A);
         b = new ButtonReader(operatorgamepad,GamepadKeys.Button.B);
+        Claw = hardwareMap.get(Servo.class,"CLAW");
 
         telemetry.addLine("Initialied");
         telemetry.update();
@@ -53,6 +56,23 @@ public class Reset_Lift extends LinearOpMode {
             } else {
                 liftSlowdwnFactor = 1;
             }
+
+            if (gamepad2.a){
+                Claw.setPosition(1);
+            } else if (gamepad2.y){
+                Claw.setPosition(0);
+            }
+
+            if (gamepad2.left_stick_button){
+                linearLift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                linearLift2.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            } else {
+                linearLift.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                linearLift2.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            }
+
+            telemetry.addData("linear lift height:",linearLift.getCurrentPosition());
+            telemetry.update();
 
 
         }

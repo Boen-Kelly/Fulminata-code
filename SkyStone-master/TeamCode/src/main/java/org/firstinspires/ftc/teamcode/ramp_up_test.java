@@ -5,6 +5,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.Servo;
@@ -50,8 +51,9 @@ public class ramp_up_test extends LinearOpMode {
         Touch = hardwareMap.get(DigitalChannel.class, "Touch");
         imu.initialize(parameters);
 
-        backRightWheel.setDirection(DcMotor.Direction.REVERSE);
-        frontRightWheel.setDirection(DcMotor.Direction.REVERSE);
+        //backRightWheel.setDirection(DcMotor.Direction.REVERSE);
+        //frontRightWheel.setDirection(DcMotor.Direction.REVERSE);
+        backLeftWheel.setDirection(DcMotorSimple.Direction.REVERSE);
         backLeftWheel.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         backRightWheel.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         frontLeftWheel.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -87,7 +89,7 @@ public class ramp_up_test extends LinearOpMode {
 
         waitForStart();
 
-        Drive(1120,1,0,0);
+        Drive(560,1,0,0);
         telemetry.addData("ramp up speed:",rampPower);
         telemetry.update();
         sleep(50000);
@@ -115,7 +117,7 @@ public class ramp_up_test extends LinearOpMode {
             if((startPosition < backLeftWheel.getCurrentPosition()) &&(backLeftWheel.getCurrentPosition() < startPosition + 70)){
                 rampUp = true;
                 rampDown = false;
-            }else if ((((distance + startPosition) - 210) < backLeftWheel.getCurrentPosition()) && (backLeftWheel.getCurrentPosition() < (distance + startPosition))){
+            }else if ((((distance + startPosition) - 270) < backLeftWheel.getCurrentPosition()) && (backLeftWheel.getCurrentPosition() < (distance + startPosition))){
                 rampDown = true;
                 rampUp = false;
             }
@@ -131,7 +133,7 @@ public class ramp_up_test extends LinearOpMode {
                 }
             } else if (rampDown) {
                 rampPower -= .15;
-                sleep(5);
+                sleep(7);
                 if (rampPower <= .3){
                     rampDown = ! rampDown;
                     rampPower = .3;

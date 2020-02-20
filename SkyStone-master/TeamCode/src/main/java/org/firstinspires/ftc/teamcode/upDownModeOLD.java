@@ -88,6 +88,8 @@ public class upDownModeOLD extends LinearOpMode {
 
     double totalTicks;
     boolean openButton = false;
+    double strafeMultiplier = 1;
+    double strafeMultiplierslowdown = 1;
 
 
 
@@ -129,11 +131,9 @@ public class upDownModeOLD extends LinearOpMode {
 
 
 
-        backLeftWheel.setDirection(DcMotor.Direction.REVERSE);
+//        backLeftWheel.setDirection(DcMotor.Direction.REVERSE);
 
-
-
-        backRightWheel.setDirection(DcMotor.Direction.REVERSE);
+        //backRightWheel.setDirection(DcMotor.Direction.REVERSE);
 
 
 
@@ -141,7 +141,7 @@ public class upDownModeOLD extends LinearOpMode {
 
 
 
-        frontRightWheel.setDirection(DcMotor.Direction.REVERSE);
+        //frontRightWheel.setDirection(DcMotor.Direction.REVERSE);
 
 
 
@@ -161,11 +161,13 @@ public class upDownModeOLD extends LinearOpMode {
 
 
 
-        CLAW.setPosition(0);
+        CLAW.setPosition(.65);
 
         trayServoL.setPosition(0);
 
         trayServoR.setPosition(1);
+
+        Capstone.setPosition(1);
 
 
 
@@ -215,33 +217,34 @@ public class upDownModeOLD extends LinearOpMode {
 
 
 
-            speed = this.gamepad1.left_stick_y * multiplier;
+
+            speed = (this.gamepad1.left_stick_y * multiplier) * 540;
 
 
 
-            rotation = -this.gamepad1.left_stick_x * multiplier;
+            rotation = (-this.gamepad1.left_stick_x * multiplier) * 540;
 
 
 
-            strafe = -this.gamepad1.right_stick_x * multiplier;
+            strafe = (-this.gamepad1.right_stick_x * multiplier) * 540;
 
 
 
+            //double backLeft
 
-
-            backLeftWheel.setPower(speed + strafe - rotation);
-
-
-
-            backRightWheel.setPower(-speed + strafe - rotation);
+            backLeftWheel.setVelocity((speed + strafe - rotation));
 
 
 
-            frontLeftWheel.setPower(speed + strafe + rotation);
+            backRightWheel.setVelocity((-speed + strafe - rotation));
 
 
 
-            frontRightWheel.setPower(-speed + strafe + rotation);
+            frontLeftWheel.setVelocity((speed + strafe + rotation));
+
+
+
+            frontRightWheel.setVelocity((-speed + strafe + rotation));
 
 
 
@@ -329,7 +332,7 @@ public class upDownModeOLD extends LinearOpMode {
 
 
 
-            if (currentPosition <= -4700) {
+            if (currentPosition <= -4900) {
 
                 if (stickHeight > .25) {
 
@@ -774,6 +777,16 @@ public class upDownModeOLD extends LinearOpMode {
                 }
             }
 
+            /**if ((Math.abs(strafe) > .01)){
+
+                strafeMultiplier = 5;
+                strafeMultiplierslowdown = .5;
+
+            } else {
+                strafeMultiplier = 1;
+                strafeMultiplierslowdown = 1;
+            }*/
+
 
 
 
@@ -786,7 +799,13 @@ public class upDownModeOLD extends LinearOpMode {
             telemetry.addData("Status", "Running");
 
             telemetry.addData("Linear lift height", linearLift.getCurrentPosition());
-
+            /**telemetry.addData("back left wheel power:",backLeftWheel.getPower());
+            telemetry.addData("back right wheel power:",backRightWheel.getPower());
+            telemetry.addData("front left wheel power:",frontLeftWheel.getPower());
+            telemetry.addData("front Right wheel power:",frontRightWheel.getPower());
+            telemetry.addData("strafe multiplier:", strafeMultiplier);
+            telemetry.addData("strafe multiplier slowdown:",strafeMultiplierslowdown);
+*/
 
 
             telemetry.update();

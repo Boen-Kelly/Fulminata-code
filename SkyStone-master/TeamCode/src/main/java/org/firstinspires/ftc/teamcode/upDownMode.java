@@ -86,13 +86,13 @@ public class upDownMode extends LinearOpMode {
         linearLift.setTargetPositionTolerance(60);
         linearLift2.setTargetPositionTolerance(60);
 
-        backLeftWheel.setDirection(DcMotor.Direction.REVERSE);
+        //backLeftWheel.setDirection(DcMotor.Direction.REVERSE);
 
-        backRightWheel.setDirection(DcMotor.Direction.REVERSE);
+        //backRightWheel.setDirection(DcMotor.Direction.REVERSE);
 
         frontLeftWheel.setDirection(DcMotor.Direction.REVERSE);
 
-        frontRightWheel.setDirection(DcMotor.Direction.REVERSE);
+        //frontRightWheel.setDirection(DcMotor.Direction.REVERSE);
 
         linearLift.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
 

@@ -224,7 +224,7 @@ public class CLAAAAAW extends LinearOpMode {
 
                     // How many degrees per second should it go up
 
-                  //  linearLift.setVelocity(60, AngleUnit.DEGREES);
+                    linearLift.setVelocity(60, AngleUnit.DEGREES);
                 //}
 
                 //else if (goalLiftHeight == 2){

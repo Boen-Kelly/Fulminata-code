@@ -5,6 +5,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.Range;
 
@@ -14,7 +15,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 
 @Autonomous (name = "Blue side park short", group = "Blue")
-@Disabled
+//@Disabled
 public class Blue_side_park_short extends LinearOpMode {
 
     private DcMotor backLeftWheel,backRightWheel,frontLeftWheel,frontRightWheel,linearLift,linearLift2;
@@ -40,8 +41,9 @@ public class Blue_side_park_short extends LinearOpMode {
         CLAW = hardwareMap.servo.get("CLAW");
         imu.initialize(parameters);
 
-        backRightWheel.setDirection(DcMotor.Direction.REVERSE);
-        frontRightWheel.setDirection(DcMotor.Direction.REVERSE);
+        //backRightWheel.setDirection(DcMotor.Direction.REVERSE);
+        //frontRightWheel.setDirection(DcMotor.Direction.REVERSE);
+        backLeftWheel.setDirection(DcMotorSimple.Direction.REVERSE);
         backLeftWheel.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         backRightWheel.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         frontLeftWheel.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -70,7 +72,7 @@ public class Blue_side_park_short extends LinearOpMode {
 
         waitForStart();
 
-        CLAW.setPosition(1);
+        /**CLAW.setPosition(1);
         sleep(500);
         Lift(280,1);
 
@@ -78,8 +80,8 @@ public class Blue_side_park_short extends LinearOpMode {
 
         CLAW.setPosition(0);
         Drop(0,.5);
-
-        Drive(250,0,.7);
+*/
+        Drive(1120,0,.7);
     }
     public void Drive(int distance, double straight,double strafe)throws InterruptedException{
 

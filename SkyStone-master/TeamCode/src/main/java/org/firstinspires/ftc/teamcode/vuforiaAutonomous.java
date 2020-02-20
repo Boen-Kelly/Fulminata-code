@@ -417,7 +417,7 @@ public class vuforiaAutonomous extends LinearOpMode {
 
 
 
-        while (!isStopRequested() && !targetVisible && ((backLeftWheel.getCurrentPosition() > (-70 + startPosition)) && (backRightWheel.getCurrentPosition() > (-70 + startPosition)))) {
+        while (!isStopRequested() && !targetVisible && ((backLeftWheel.getCurrentPosition() > (-100 + startPosition)) && (backRightWheel.getCurrentPosition() > (-100 + startPosition)))) {
 
             /**targetVisible = false;
             for (VuforiaTrackable trackable : allTrackables) {
@@ -580,121 +580,15 @@ public class vuforiaAutonomous extends LinearOpMode {
 
 
 
-        /**if (!targetNotSeen) {
-            while (!closeEnough && !isStopRequested()) {
 
-                targetVisible = false;
-                for (VuforiaTrackable trackable : allTrackables) {
-                    if (((VuforiaTrackableDefaultListener) trackable.getListener()).isVisible()) {
-                        telemetry.addData("Visible Target", trackable.getName());
-                        targetVisible = true;
-
-                        // getUpdatedRobotLocation() will return null if no new information is available since
-                        // the last time that call was made, or if the trackable is not currently visible.
-                        OpenGLMatrix robotLocationTransform = ((VuforiaTrackableDefaultListener) trackable.getListener()).getUpdatedRobotLocation();
-                        if (robotLocationTransform != null) {
-                            lastLocation = robotLocationTransform;
-                        }
-                        break;
-                    }
-                }
-
-                // Provide feedback as to where the robot is located (if we know).
-                if (targetVisible && !closeEnough) {
-                    // express position (translation) of robot in inches.
-
-                    VuforiaTrackableDefaultListener listener = (VuforiaTrackableDefaultListener) stoneTarget.getListener();
-                    listener.addTrackable(stoneTarget);
-                    //VuforiaTrackable listining = stoneTarget;
-                    //listining.getListener();
-                    OpenGLMatrix location;
-                    VectorF translation = lastLocation.getTranslation();
-
-                    if ((stoneTarget != null) && (listener != null) && listener.isVisible()) {
-                        location = listener.getRobotLocation();
-                        if (location != null) {
-                            trans = location.getTranslation();
-                            rot = Orientation.getOrientation(location, EXTRINSIC, XYZ, DEGREES);
-                            //telemetry.update();
-                        }
-                    }
-                    telemetry.addData("Pos (in)", "{X, Y, Z} = %.1f, %.1f, %.1f",
-                            translation.get(0) / mmPerInch, translation.get(1) / mmPerInch, translation.get(2) / mmPerInch);
-
-                    // express the rotation of the robot in degrees.
-                    Orientation rotation = Orientation.getOrientation(lastLocation, EXTRINSIC, XYZ, DEGREES);
-                    telemetry.addData("Rot (deg)", "{Roll, Pitch, Heading} = %.0f, %.0f, %.0f", rotation.firstAngle, rotation.secondAngle, rotation.thirdAngle);
-                    telemetry.addData("y translation:", trans.get(1));
-
-                    double actualTransY = trans.get(1);
-                    double actualTransX = trans.get(0);
-                    //double actualRot =  -rot.thirdAngle;
-                    double correctionY = (0 - actualTransY) / 200;
-                    double correctionX = (470 - actualTransX) / 1500;
-                    //double correctionRot = (0 - actualRot)/100;
-
-                    if ((Math.abs(correctionX) <= .2) && !((-650 <= actualTransX) && (actualTransX >= 0))) {
-                        correctionX = .2;
-                    }
-                    if ((Math.abs(correctionY) <= .2) && !(-100 < actualTransY) && (actualTransY < 100)) {
-                        correctionY = .2;
-                    }
-                    /**if ((Math.abs(correctionRot) < .2) && ((-10 < actualRot) && (actualRot < 10))){
-                     correctionRot = .2;
-                     }
-
-
-                    double frontRightPower = correctionX + correctionY;
-                    double frontLeftPower = correctionX - correctionY;
-                    double backRightPower = correctionX - correctionY;
-                    double backLeftPower = correctionX + correctionY;
-
-                    frontRPower = Range.clip(frontRPower, -1, 1);
-                    frontLPower = Range.clip(frontLPower, -1, 1);
-                    backRPower = Range.clip(backRPower, -1, 1);
-                    backLPower = Range.clip(backLPower, -1, 1);
-
-                    backLeftWheel.setPower(backLeftPower);
-                    backRightWheel.setPower(backRightPower);
-                    frontLeftWheel.setPower(frontLeftPower);
-                    frontRightWheel.setPower(frontRightPower);
-                    telemetry.addData("correction y rate:", correctionY);
-                    telemetry.addData("correction x rate:", correctionX);
-                    telemetry.addData("x axis actual:", actualTransX);
-                    telemetry.addData("y axis actual:", actualTransY);
-
-
-                    if (((-470 <= actualTransX) && (actualTransX <= 0)) && ((-10 <= actualTransY) && (actualTransY <= 10))) {
-                        closeEnough = true;
-                    } else {
-                        closeEnough = false;
-                    }
-                } else {
-                    telemetry.addData("Visible Target", "none");
-                    backLeftWheel.setPower(0);
-                    frontLeftWheel.setPower(0);
-                    backRightWheel.setPower(0);
-                    frontRightWheel.setPower(0);
-                }
-                telemetry.update();
-
-
-            }
-        }*/
 
         if (!targetNotSeen) {
             //**
-            if (actualTransY == 0){
+            if (((actualTransY == 0) && (actualTransX == 0)) && (actualRot == 0)){
                 targetsSkyStone.deactivate();
                 targetsSkyStone.activate();
-                sleep(250);
-            } else if (actualTransX == 0){
-                targetsSkyStone.deactivate();
-                targetsSkyStone.activate();
-                sleep(250);
-            } else if (actualRot == 0){
-                targetsSkyStone.deactivate();
-                targetsSkyStone.activate();
+                telemetry.addLine("capture error");
+                telemetry.update();
                 sleep(250);
             }
                 //*/
@@ -755,7 +649,7 @@ public class vuforiaAutonomous extends LinearOpMode {
                             closeEnoughX = false;
                         }
 
-                        if ((-4 <= actualTransY) && (actualTransY <= 4)) {
+                        if ((-3 <= actualTransY) && (actualTransY <= 3)) {
                             closeEnoughY = true;
                         } else {
                             closeEnoughY = false;
@@ -770,8 +664,8 @@ public class vuforiaAutonomous extends LinearOpMode {
                         if (closeEnoughRot) {
                             correctionRot = 0;
                         } else {
-                            if ((-3 <= actualRot) && (actualRot <= 3)) {
-                                correctionRot = (0 - actualRot) / 25;
+                            if ((-2 <= actualRot) && (actualRot <= 2)) {
+                                correctionRot = (0 - actualRot) * 1.4;
                             } else {
                                 correctionRot = (0 - actualRot) / 150;
                             }
@@ -787,7 +681,7 @@ public class vuforiaAutonomous extends LinearOpMode {
                             correctionY = 0;
                         } else {
                             if ((-3 <= actualTransY) && (actualTransY <= 3)) {
-                                correctionY = (0 - actualTransY) / 200;
+                                correctionY = (0 - actualTransY) / 125;
                             } else {
                                 correctionY = (0 - actualTransY) / 300;
                             }
@@ -906,7 +800,7 @@ public class vuforiaAutonomous extends LinearOpMode {
             Lift(270,1);
             backupwOutRamp(-100,-.5,0,0);
             //backup(-200,0,-.7,0);
-            backup(-920,0,-1,5);
+            backup(-1080,0,-1,7);
             //backup(-200,0,-.7,0);
         } else if (positionSkystone.equals("center")){
             Lift(1780,1);
@@ -920,7 +814,7 @@ public class vuforiaAutonomous extends LinearOpMode {
             Lift(270,1);
             backupwOutRamp(-100,-.5,0,0);
             //backup(-200,0,-.7,90);
-            backup(-950,0,-1,5);
+            backup(-950,0,-1,7);
             //backup(-200,0,-.7,90);
         }else if (positionSkystone.equals("left")){
             Lift(1780,1);
@@ -934,27 +828,27 @@ public class vuforiaAutonomous extends LinearOpMode {
             Lift(270,1);
             backupwOutRamp(-100,-.5,0,0);
             //backup(-200,0,-.7,90);
-            backup(-980,0,-1,5);
+            backup(-900,0,-1,7);
             //backup(-200,0,-.7,90);
         }
 
-        Lift(1900,1);
+        Lift(1970,1);
 
-        DrivewDistance(3,.5,0,0);
+        DrivewDistance(3,.4,0,0);
         DrivewOutRamp(20,.4,0,0);
 
         trayServoL.setPosition(1);
         trayServoR.setPosition(0);
         sleep(500);
 
-        backup(-500,-1,0,80);
+        backup(-500,-3,0,70);
 
 
-        turnLeft(115);
+        turnLeft(100);
 
         startPosition = backLeftWheel.getCurrentPosition();
 
-        while (backLeftWheel.getCurrentPosition() < (startPosition + 280)){
+        while (backLeftWheel.getCurrentPosition() < (startPosition + 140)){
             backLeftWheel.setVelocity(540,DEGREES);
             backRightWheel.setVelocity(540,DEGREES);
             frontLeftWheel.setVelocity(540,DEGREES);
@@ -973,15 +867,17 @@ public class vuforiaAutonomous extends LinearOpMode {
 
         Drop(0,1);
 
-        backup(-300,-1,0,100);
+        backup(-370,-1,0,100);
 
         CLAW.setPosition(1);
 
         sleep(1000);
 
+        /**
         telemetry.addData("time:", runtime.time());
         telemetry.update();
         sleep(999999);
+         //*/
 
 
     }
